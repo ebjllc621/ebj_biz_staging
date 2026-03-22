@@ -5,6 +5,7 @@
  * and helper functions for CSRF cookie management.
  */
 
+import { NextResponse } from 'next/server';
 import { validateCsrf, cookieName, createCsrfCookie, headerName } from './csrf';
 import { toResponse } from '../api/errorEnvelope';
 
@@ -47,26 +48,31 @@ export function withCsrf<
  * The cookie is HttpOnly (not readable by JS), so client uses body token for header.
  * Server validates header matches cookie (double-submit pattern).
  *
- * @returns Response with CSRF cookie set and token in body
+ * Uses NextResponse.cookies.set() for reliable cookie delivery in standalone mode
+ * (raw Set-Cookie headers get lost during Response->NextResponse conversion in apiHandler).
+ *
+ * @returns NextResponse with CSRF cookie set and token in body
  */
-export function csrfCookieResponse(): Response {
-  const { name, value, attributes } = createCsrfCookie();
+export function csrfCookieResponse(): NextResponse {
+  const { name, value } = createCsrfCookie();
+  const isProduction = process.env.NODE_ENV === 'production';
 
-  // Return both cookie AND token in body
-  // Client reads token from body to send in X-CSRF-Token header
-  // Server compares header with HttpOnly cookie
-  const body = JSON.stringify({
+  // Use NextResponse with cookies.set() so the cookie survives
+  // standalone mode and proxy environments (same mechanism as bk_session)
+  const response = NextResponse.json({
     ok: true,
     data: {
       csrfToken: value
     }
   });
 
-  return new Response(body, {
-    status: 200,
-    headers: {
-      'Content-Type': 'application/json',
-      'set-cookie': `${name}=${value}; ${attributes}`
-    }
+  response.cookies.set(name, value, {
+    path: '/',
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: isProduction,
+    maxAge: 1800
   });
+
+  return response;
 }
