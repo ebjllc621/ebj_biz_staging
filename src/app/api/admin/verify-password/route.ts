@@ -155,7 +155,7 @@ export const POST = apiHandler<VerifyPasswordData>(
 
     // Step 7: Verify password (slow bcrypt operation)
     // Use bcrypt directly without pepper (matches login behavior)
-    const bcrypt = require('bcrypt');
+    const bcrypt = require('bcryptjs');
     const hashString = Buffer.isBuffer(user.password_hash)
       ? user.password_hash.toString('utf8')
       : user.password_hash;

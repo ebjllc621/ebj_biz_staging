@@ -3,7 +3,7 @@
  * @module password-service
  */
 
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { timingSafeEqual } from './crypto';
 
 /**

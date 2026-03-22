@@ -21,7 +21,7 @@
  */
 
 import * as crypto from 'crypto';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { DatabaseService } from '../DatabaseService';
 import { SessionService, SessionContext } from './SessionService';
 import { DbConfig } from '../../types/db';

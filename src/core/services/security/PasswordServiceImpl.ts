@@ -9,7 +9,7 @@
  * Phase 1 Implementation - Simplified and focused on core functionality
  */
 
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 /**
  * Password validation result interface
