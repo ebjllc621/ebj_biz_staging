@@ -700,7 +700,7 @@ export class AuthenticationService extends DatabaseService {
     }
 
     try {
-      const bcrypt = await import('bcrypt');
+      const bcrypt = await import('bcryptjs');
 
       // Handle both Buffer and string hash storage
       const hashString = Buffer.isBuffer(passwordHash)
@@ -723,7 +723,7 @@ export class AuthenticationService extends DatabaseService {
    * the same time as a real verification to prevent enumeration.
    */
   private async simulatePasswordVerification(): Promise<void> {
-    const bcrypt = await import('bcrypt');
+    const bcrypt = await import('bcryptjs');
     // Use a dummy hash that will always fail but takes same time
     const dummyHash = '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X.NHd4Y7YsJJJJJJJ';
     await bcrypt.compare('dummy-password', dummyHash);
