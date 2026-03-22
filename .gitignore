@@ -1,0 +1,74 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+.pnp.cjs
+.yarn/
+.yarnrc*
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Environment files (NEVER commit secrets)
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDE / Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+
+# Testing
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Media / uploads
+var/media/
+var/data/
+uploads/
+
+# PM2
+.pm2/
+
+# Misc
+*.tgz
+*.map
+NUL
