@@ -180,8 +180,14 @@ export const GET = apiHandler(async (context) => {
         // Media
         logo_url: listing.logo_url,
 
-        // Categorization
-        add_ons: listing.add_ons ? safeJsonParse(listing.add_ons, []) : null,
+        // Categorization - normalize add_ons to string[] (DB may store objects with {id, name, status, activated_at})
+        add_ons: listing.add_ons
+          ? (safeJsonParse(listing.add_ons, []) as unknown[]).map((item: unknown) =>
+              typeof item === 'object' && item !== null && 'name' in item
+                ? String((item as { name: string }).name)
+                : String(item)
+            )
+          : null,
         category_id: listing.category_id,
         category_name: categoryName,
         active_categories: activeCategories,
