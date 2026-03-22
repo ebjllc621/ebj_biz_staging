@@ -378,11 +378,15 @@ npm run pm2:start        # Start with PM2
 npm run pm2:stop         # Stop
 npm run pm2:restart      # Restart
 npm run pm2:logs         # View logs
+npm run pm2:status       # Check process status
 ```
 
 > **Note:** Always run `npm run typecheck` locally before pushing to production.
 > The VPS build skips TypeScript type-checking to avoid JavaScript heap out-of-memory
 > errors on servers with limited RAM. Type safety is enforced during local development.
+
+> **PM2 is installed as a local dependency** (not global). All pm2 scripts use `npx pm2`
+> so no global install or sudo access is required on the VPS.
 
 **PM2 Configuration** (`ecosystem.config.js`):
 
