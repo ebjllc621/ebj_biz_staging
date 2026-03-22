@@ -27,13 +27,19 @@ export function AdminShell({ children }: AdminShellProps) {
   const pathname = usePathname();
   const { user, loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  // Track if we've ever confirmed auth - prevents unmounting children during revalidation
+  const hasAuthed = React.useRef(false);
+  if (user && user.role === 'admin') {
+    hasAuthed.current = true;
+  }
 
   // ============================================================================
   // AUTH GATE - Blocks sidebar/menu from rendering to unauthorized users
   // ============================================================================
 
-  // Loading state - show spinner, do NOT render sidebar
-  if (loading) {
+  // Loading state - show spinner ONLY on initial load, not during tab-switch revalidation
+  // Once admin is confirmed, never show the spinner again (preserves modal/form state)
+  if (loading && !hasAuthed.current) {
     return (
       <div className="h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">

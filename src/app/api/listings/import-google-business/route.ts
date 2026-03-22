@@ -12,7 +12,7 @@
 
 import { apiHandler, ApiContext, createSuccessResponse, createErrorResponse } from '@core/api/apiHandler';
 import { BizError } from '@core/errors/BizError';
-import { withCsrf } from '@/lib/security/withCsrf';
+// withCsrf removed: this route is read-only (proxies Google Places API, no DB writes)
 
 // ============================================================================
 // TYPES
@@ -316,7 +316,7 @@ function extractSocialMediaFromWebsite(website: string): ImportedBusinessData['s
 // ROUTE HANDLER
 // ============================================================================
 
-export const POST = withCsrf(apiHandler(async (context: ApiContext) => {
+export const POST = apiHandler(async (context: ApiContext) => {
   const { request } = context;
 
   // Get API key from environment
@@ -452,4 +452,4 @@ export const POST = withCsrf(apiHandler(async (context: ApiContext) => {
       context.requestId
     );
   }
-}));
+});
