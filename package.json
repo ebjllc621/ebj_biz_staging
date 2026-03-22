@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "cross-env NODE_OPTIONS=--max-old-space-size=8192 next dev --turbo",
     "build": "next build",
+    "build:vps": "SKIP_TYPE_CHECK=true NODE_OPTIONS=--max-old-space-size=3072 next build",
     "start": "next start",
     "postbuild": "node scripts/postbuild.mjs",
     "pm2:start": "pm2 start ecosystem.config.js",

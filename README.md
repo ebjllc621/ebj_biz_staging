@@ -370,12 +370,19 @@ npm run test:billing                # Billing service tests
 ### Production (PM2)
 
 ```bash
-npm run build            # Build standalone output
+# On VPS — use build:vps to skip type-checking and cap heap at 3GB (avoids OOM on low-memory servers)
+npm run build:vps        # Production build for VPS (recommended)
+npm run build            # Production build with full type-checking (local only)
+
 npm run pm2:start        # Start with PM2
 npm run pm2:stop         # Stop
 npm run pm2:restart      # Restart
 npm run pm2:logs         # View logs
 ```
+
+> **Note:** Always run `npm run typecheck` locally before pushing to production.
+> The VPS build skips TypeScript type-checking to avoid JavaScript heap out-of-memory
+> errors on servers with limited RAM. Type safety is enforced during local development.
 
 **PM2 Configuration** (`ecosystem.config.js`):
 

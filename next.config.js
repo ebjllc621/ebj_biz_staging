@@ -177,8 +177,9 @@ const nextConfig = {
     ignoreDuringBuilds: true
   },
   typescript: {
-    // Ensure TypeScript errors still block builds (we have 0 TS errors)
-    ignoreBuildErrors: false
+    // Local builds: strict (0 TS errors enforced)
+    // VPS builds: skip type-checking to avoid OOM (typecheck runs locally before push)
+    ignoreBuildErrors: process.env.SKIP_TYPE_CHECK === 'true',
   },
 
   // Dev-only: controls how many compiled pages the dev server keeps in memory
