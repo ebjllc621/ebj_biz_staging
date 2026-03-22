@@ -12,8 +12,16 @@ const nextConfig = {
     // Disable prerender errors for Client Components with Context
     // Fixes: "Cannot read properties of null (reading 'useContext')" during build
     missingSuspenseWithCSRBailout: false,
-    // Keep sharp server-side only - it uses native Node.js bindings (child_process, fs)
-    serverComponentsExternalPackages: ['sharp'],
+    // Externalize server-only packages from standalone bundle tracing.
+    // Without this, standalone copies these into .next/standalone/node_modules/
+    // which can break native bindings or cause incomplete module resolution.
+    serverComponentsExternalPackages: [
+      'sharp',          // Image processing - native libvips bindings
+      'mariadb',        // Database driver - must resolve from root node_modules
+      'better-sqlite3', // Native C++ SQLite bindings (legacy)
+      'bcryptjs',       // Password hashing - server-only
+      'nodemailer',     // SMTP email - server-only
+    ],
     // Turbopack resolve aliases - mirrors the webpack fallbacks below for `next dev --turbo`
     // Required because Turbopack ignores the webpack callback entirely.
     // The import chain: useUniversalMedia (client) → MediaService → LocalMediaProvider → sharp → detect-libc → child_process
