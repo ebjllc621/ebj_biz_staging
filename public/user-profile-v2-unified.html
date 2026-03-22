@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Profile v2 — Unified Hybrid Layout — Bizconekt</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #f9fafb; color: #1a1a2e; line-height: 1.6; }
+
+  /* Brand colors */
+  .text-navy { color: #022641; }
+  .text-orange { color: #ed6437; }
+  .bg-orange { background: #ed6437; }
+
+  /* Container */
+  .container { max-width: 80rem; margin: 0 auto; padding: 0 16px; }
+
+  /* View Mode Toggle Bar */
+  .view-mode-bar { background: #fff; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 50; }
+  .view-mode-inner { max-width: 80rem; margin: 0 auto; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  .view-mode-left { display: flex; align-items: center; gap: 12px; }
+  .view-mode-label { font-size: 13px; color: #6b7280; font-weight: 500; }
+  .view-toggle { display: flex; background: #f3f4f6; border-radius: 8px; overflow: hidden; border: 1px solid #e5e7eb; }
+  .view-toggle button { padding: 6px 16px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s; background: transparent; color: #6b7280; }
+  .view-toggle button.active { background: #022641; color: #fff; }
+  .view-toggle button:hover:not(.active) { background: #e5e7eb; }
+
+  /* Profile Merge Toggle */
+  .merge-toggle { display: flex; align-items: center; gap: 8px; }
+  .merge-label { font-size: 13px; color: #6b7280; }
+  .toggle-switch { position: relative; width: 44px; height: 24px; background: #d1d5db; border-radius: 12px; cursor: pointer; transition: background 0.3s; }
+  .toggle-switch.active { background: #ed6437; }
+  .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: #fff; border-radius: 50%; transition: transform 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+  .toggle-switch.active::after { transform: translateX(20px); }
+
+  .edit-actions { display: flex; gap: 8px; }
+  .btn-edit { display: inline-flex; align-items: center; gap: 6px; padding: 6px 16px; font-size: 13px; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s; }
+  .btn-edit-primary { background: #ed6437; color: #fff; }
+  .btn-edit-primary:hover { background: #d55a31; }
+  .btn-edit-secondary { background: #fff; color: #374151; border: 1px solid #d1d5db; }
+  .btn-edit-secondary:hover { border-color: #9ca3af; }
+
+  /* Completion Banner */
+  .completion-banner { background: linear-gradient(135deg, #eff6ff, #fef3c7); border: 1px solid #bfdbfe; border-radius: 12px; padding: 16px 20px; margin-top: 16px; display: flex; align-items: center; gap: 16px; }
+  .completion-ring { width: 48px; height: 48px; border-radius: 50%; border: 4px solid #e5e7eb; border-top-color: #ed6437; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #022641; flex-shrink: 0; }
+  .completion-text { flex: 1; }
+  .completion-text p { font-size: 14px; color: #374151; }
+  .completion-text .hint { font-size: 12px; color: #9ca3af; margin-top: 2px; }
+  .completion-link { font-size: 13px; color: #ed6437; font-weight: 600; text-decoration: none; white-space: nowrap; }
+  .completion-link:hover { text-decoration: underline; }
+
+  /* Hero Card */
+  .hero-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #f3f4f6; overflow: hidden; margin-top: 16px; }
+  .cover-banner { width: 100%; height: 192px; background: linear-gradient(to right, #022641, #0f4c81); position: relative; }
+  .cover-banner img { width: 100%; height: 100%; object-fit: cover; }
+  .cover-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.15); }
+
+  .hero-body { padding: 0 24px 24px; }
+  .hero-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+  .avatar-wrap { margin-top: -64px; position: relative; z-index: 10; }
+  .avatar { width: 128px; height: 128px; border-radius: 50%; border: 4px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); overflow: hidden; background: #022641; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 40px; font-weight: 700; }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+  .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .btn-primary { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 14px; background: #ed6437; color: #fff; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; transition: background 0.2s; }
+  .btn-primary:hover { background: #d55a31; }
+  .btn-secondary { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 14px; font-weight: 600; border-radius: 8px; border: 2px solid #d1d5db; color: #374151; background: #fff; cursor: pointer; transition: border-color 0.2s; }
+  .btn-secondary:hover { border-color: #022641; }
+
+  .hero-info { margin-top: 16px; }
+  .hero-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .hero-name-row h1 { font-size: 30px; font-weight: 700; color: #022641; }
+  .tier-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600; }
+  .tier-plus { background: #dbeafe; color: #1d4ed8; }
+  .tier-premium { background: #f3e8ff; color: #7c3aed; }
+  .verified-icon { width: 20px; height: 20px; color: #22c55e; }
+
+  .hero-headline { color: #6b7280; margin-top: 4px; font-size: 16px; }
+  .hero-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 12px; font-size: 14px; color: #9ca3af; }
+  .hero-meta span { display: flex; align-items: center; gap: 4px; }
+  .hero-meta svg { width: 16px; height: 16px; }
+
+  /* Creator badge strip (shown when merged) */
+  .creator-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f3f4f6; }
+  .creator-badge-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #9ca3af; font-weight: 600; margin-right: 4px; display: flex; align-items: center; }
+  .badge-category { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 500; background: #eef2ff; color: #4338ca; border: 1px solid #e0e7ff; }
+  .badge-platform { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 500; border: 1px solid; }
+  .badge-youtube { background: #fef2f2; color: #b91c1c; border-color: #fee2e2; }
+  .badge-instagram { background: #fdf2f8; color: #be185d; border-color: #fce7f3; }
+  .badge-tiktok { background: #111827; color: #fff; border-color: #374151; }
+
+  /* Main Grid */
+  .main-grid { display: grid; grid-template-columns: 1fr; gap: 24px; margin-top: 24px; padding-bottom: 60px; }
+  @media (min-width: 1024px) { .main-grid { grid-template-columns: 2fr 1fr; } }
+
+  /* Content Cards */
+  .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #f3f4f6; padding: 24px; margin-bottom: 24px; }
+  .card h2 { font-size: 18px; font-weight: 600; color: #022641; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .card h2 svg { width: 20px; height: 20px; color: #ed6437; flex-shrink: 0; }
+
+  /* Bio */
+  .bio-text { color: #374151; line-height: 1.7; white-space: pre-line; }
+
+  /* Skills badges */
+  .skill-badges { display: flex; flex-wrap: wrap; gap: 8px; }
+  .skill-badge { background: #022641; color: #fff; padding: 4px 14px; border-radius: 9999px; font-size: 13px; font-weight: 500; }
+
+  /* Interest badges */
+  .interest-badges { display: flex; flex-wrap: wrap; gap: 8px; }
+  .interest-badge { background: #F5A882; color: #022641; padding: 4px 14px; border-radius: 9999px; font-size: 13px; font-weight: 500; }
+
+  /* Groups/Memberships */
+  .group-item { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; }
+  .group-item:last-child { margin-bottom: 0; }
+  .group-name { font-weight: 600; color: #022641; font-size: 14px; }
+  .group-role { font-size: 13px; color: #6b7280; }
+  .group-desc { font-size: 12px; color: #9ca3af; margin-top: 4px; }
+
+  /* Education */
+  .edu-item { display: flex; gap: 12px; align-items: flex-start; padding: 8px 0; }
+  .edu-icon { width: 36px; height: 36px; border-radius: 8px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .edu-icon svg { width: 18px; height: 18px; color: #6b7280; }
+  .edu-name { font-weight: 600; color: #022641; font-size: 14px; }
+  .edu-detail { font-size: 13px; color: #6b7280; }
+
+  /* Creator section: Collaborations */
+  .collab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 768px) { .collab-grid { grid-template-columns: 1fr; } }
+  .collab-item { border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; }
+  .collab-item:hover { border-color: #d1d5db; }
+  .collab-brand { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .brand-initial { width: 32px; height: 32px; border-radius: 50%; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; color: #6b7280; flex-shrink: 0; }
+  .collab-type-badge { display: inline-block; background: #eef2ff; color: #4338ca; font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; }
+  .collab-desc { font-size: 12px; color: #6b7280; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .collab-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding-top: 8px; border-top: 1px solid #f3f4f6; }
+  .collab-footer .meta { font-size: 12px; color: #9ca3af; }
+  .collab-footer .link { font-size: 12px; color: #ed6437; text-decoration: none; font-weight: 600; }
+
+  /* Panels section (draggable) */
+  .panels-section { margin-top: 24px; }
+  .panel-manage-bar { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 16px; }
+  .panel-manage-bar span { font-size: 13px; color: #6b7280; }
+  .panel-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.06); border: 1px solid #f3f4f6; padding: 20px; margin-bottom: 16px; position: relative; }
+  .panel-card .drag-handle { position: absolute; top: 8px; left: 8px; width: 20px; height: 20px; color: #d1d5db; cursor: grab; }
+  .panel-card h3 { font-size: 16px; font-weight: 600; color: #022641; margin-bottom: 12px; padding-left: 24px; }
+
+  /* Sidebar */
+  .sidebar { display: flex; flex-direction: column; gap: 16px; }
+  .sidebar-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #f3f4f6; padding: 24px; }
+  .sidebar-card h3 { font-size: 16px; font-weight: 600; color: #022641; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .sidebar-card h3 svg { width: 20px; height: 20px; color: #ed6437; }
+
+  .stat-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .stat-row:last-child { margin-bottom: 0; }
+  .stat-row svg { width: 20px; height: 20px; color: #9ca3af; flex-shrink: 0; }
+  .stat-label { font-size: 12px; color: #9ca3af; }
+  .stat-value { font-size: 14px; font-weight: 600; color: #111827; }
+
+  /* Social icons */
+  .social-icons { display: flex; flex-wrap: wrap; gap: 8px; }
+  .social-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s; cursor: pointer; color: #fff; }
+  .social-icon:hover { transform: scale(1.1); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+  .social-icon svg { width: 18px; height: 18px; }
+  .social-biz { background: #F5A882; } .social-biz:hover { background: #ed6437; }
+  .social-web { background: #9ca3af; } .social-web:hover { background: #6b7280; }
+  .social-ig { background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045); }
+  .social-yt { background: #FF0000; }
+  .social-li { background: #0A66C2; }
+  .social-tw { background: #1a1a2e; }
+  .social-tt { background: #000; }
+
+  /* CTA card */
+  .cta-btn { width: 100%; padding: 12px; background: #ed6437; color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+  .cta-btn:hover { background: #d55a31; }
+
+  /* Rate card */
+  .rate-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f3f4f6; }
+  .rate-row:last-child { border-bottom: none; }
+  .rate-label { font-size: 13px; color: #6b7280; }
+  .rate-value { font-size: 14px; font-weight: 600; color: #022641; }
+
+  /* Section divider for merged content */
+  .section-divider { display: flex; align-items: center; gap: 12px; margin: 24px 0 16px; }
+  .section-divider .line { flex: 1; height: 1px; background: #e5e7eb; }
+  .section-divider .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #9ca3af; font-weight: 600; background: #f9fafb; padding: 2px 12px; border-radius: 4px; }
+
+  /* Responsive */
+  @media (max-width: 1023px) {
+    .hero-top { flex-direction: column; align-items: flex-start; }
+    .avatar { width: 96px; height: 96px; font-size: 32px; }
+    .avatar-wrap { margin-top: -48px; }
+    .hero-name-row h1 { font-size: 24px; }
+    .cover-banner { height: 128px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- View Mode Toggle Bar (Edit Mode) -->
+<div class="view-mode-bar">
+  <div class="view-mode-inner">
+    <div class="view-mode-left">
+      <span class="view-mode-label">View as:</span>
+      <div class="view-toggle">
+        <button class="active">Edit View</button>
+        <button>Published View</button>
+      </div>
+      <div class="merge-toggle" style="margin-left: 16px;">
+        <span class="merge-label">Merge Creator Profile</span>
+        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+      </div>
+    </div>
+    <div class="edit-actions">
+      <button class="btn-edit btn-edit-secondary" onclick="alert('Panel management mode')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Manage Panels
+      </button>
+      <button class="btn-edit btn-edit-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit Profile
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Completion Banner (Edit View Only) -->
+  <div class="completion-banner">
+    <div class="completion-ring">72%</div>
+    <div class="completion-text">
+      <p><strong>Your profile is 72% complete.</strong> Add a cover photo and fill in your education to boost visibility.</p>
+      <span class="hint">Complete profiles get 3x more connection requests</span>
+    </div>
+    <a href="#" class="completion-link">Complete Now &rarr;</a>
+  </div>
+
+  <!-- Hero Card -->
+  <div class="hero-card">
+    <div class="cover-banner">
+      <div class="cover-overlay"></div>
+    </div>
+    <div class="hero-body">
+      <div class="hero-top">
+        <div class="avatar-wrap">
+          <div class="avatar">JD</div>
+        </div>
+        <div class="hero-actions">
+          <button class="btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+            Connect
+          </button>
+          <button class="btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            Follow
+          </button>
+          <button class="btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Message
+          </button>
+          <button class="btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Share
+          </button>
+          <button class="btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+            Recommend
+          </button>
+        </div>
+      </div>
+
+      <div class="hero-info">
+        <div class="hero-name-row">
+          <h1>Jordan Davis</h1>
+          <span class="tier-badge tier-plus">Plus Member</span>
+          <svg class="verified-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <p class="hero-headline">UX Designer &amp; Content Creator</p>
+
+        <div class="hero-meta">
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Austin, TX
+          </span>
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            UX Designer
+          </span>
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Member since March 2024
+          </span>
+        </div>
+
+        <!-- Creator merge: platform + content badges -->
+        <div class="creator-badges">
+          <span class="creator-badge-label">Creator:</span>
+          <span class="badge-platform badge-youtube">YouTube</span>
+          <span class="badge-platform badge-instagram">Instagram</span>
+          <span class="badge-platform badge-tiktok">TikTok</span>
+          <span style="width:8px"></span>
+          <span class="badge-category">UX Design</span>
+          <span class="badge-category">Productivity</span>
+          <span class="badge-category">Tech Reviews</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Grid: 2-column layout -->
+  <div class="main-grid">
+    <!-- Content Column -->
+    <div>
+      <!-- Personal: About -->
+      <div class="card">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          About
+        </h2>
+        <p class="bio-text">Passionate UX designer with 8 years of experience crafting intuitive digital experiences. I believe great design should be invisible — when it works perfectly, you don't even notice it.
+
+Outside of work, I create content about design thinking, productivity systems, and the intersection of creativity and technology. My YouTube channel focuses on practical UX tutorials and behind-the-scenes looks at real product design processes.</p>
+      </div>
+
+      <!-- Personal: Skills -->
+      <div class="card">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          Skills
+        </h2>
+        <div class="skill-badges">
+          <span class="skill-badge">UX Research</span>
+          <span class="skill-badge">Figma</span>
+          <span class="skill-badge">Prototyping</span>
+          <span class="skill-badge">Design Systems</span>
+          <span class="skill-badge">User Testing</span>
+          <span class="skill-badge">React</span>
+          <span class="skill-badge">TypeScript</span>
+          <span class="skill-badge">Accessibility</span>
+        </div>
+      </div>
+
+      <!-- Personal: Hobbies -->
+      <div class="card">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+          Hobbies &amp; Activities
+        </h2>
+        <p class="bio-text">Rock climbing, photography, board game design, and building mechanical keyboards. I run a monthly design meetup in Austin called "Pixels & Pints".</p>
+      </div>
+
+      <!-- Personal: Goals -->
+      <div class="card">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          Goals
+        </h2>
+        <p class="bio-text">Launch a UX design bootcamp focused on underrepresented communities. Grow my YouTube channel to 100K subscribers. Write a book about design systems for startups.</p>
+      </div>
+
+      <!-- Creator Merged Section Divider -->
+      <div class="section-divider">
+        <div class="line"></div>
+        <span class="label">Creator Content</span>
+        <div class="line"></div>
+      </div>
+
+      <!-- Creator: Brand Collaborations -->
+      <div class="card">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 0C1.46 6.7 1.33 10.28 4 13l8 8 8-8c2.67-2.72 2.54-6.3.42-8.42z"/></svg>
+          Brand Collaborations <span style="color:#9ca3af;font-weight:400;font-size:14px;margin-left:4px">(3)</span>
+        </h2>
+        <div class="collab-grid">
+          <div class="collab-item">
+            <div class="collab-brand"><div class="brand-initial">F</div><span style="font-weight:500">Figma</span></div>
+            <span class="collab-type-badge">Sponsored Content</span>
+            <p class="collab-desc">Tutorial series on advanced Figma prototyping techniques and design system workflows.</p>
+            <div class="collab-footer"><span class="meta">Feb 2026</span><a href="#" class="link">View Content</a></div>
+          </div>
+          <div class="collab-item">
+            <div class="collab-brand"><div class="brand-initial">N</div><span style="font-weight:500">Notion</span></div>
+            <span class="collab-type-badge">Brand Ambassador</span>
+            <p class="collab-desc">Ongoing partnership showcasing UX design workflows and project management in Notion.</p>
+            <div class="collab-footer"><span class="meta">Jan 2026</span><a href="#" class="link">View Content</a></div>
+          </div>
+          <div class="collab-item">
+            <div class="collab-brand"><div class="brand-initial">A</div><span style="font-weight:500">Adobe</span></div>
+            <span class="collab-type-badge">Product Review</span>
+            <p class="collab-desc">In-depth comparison of Adobe XD vs Figma for enterprise design team workflows.</p>
+            <div class="collab-footer"><span class="meta">Nov 2025</span><a href="#" class="link">View Content</a></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Draggable Panels -->
+      <div class="panels-section">
+        <div class="panel-manage-bar">
+          <span>Drag panels to reorder &bull; Toggle visibility with eye icon</span>
+          <button class="btn-edit btn-edit-secondary" style="font-size:12px;padding:4px 12px;">Reset Layout</button>
+        </div>
+
+        <div class="panel-card">
+          <svg class="drag-handle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+          <h3>Recommendations Received</h3>
+          <p style="color:#6b7280;font-size:14px">3 recommendations from your connections</p>
+        </div>
+
+        <div class="panel-card">
+          <svg class="drag-handle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+          <h3>Associated Listings</h3>
+          <p style="color:#6b7280;font-size:14px">2 listings associated with this profile</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <!-- Stats (combined personal + creator) -->
+      <div class="sidebar-card">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Profile Stats
+        </h3>
+        <div class="stat-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <div><div class="stat-label">Profile Views (30d)</div><div class="stat-value">1,247</div></div>
+        </div>
+        <div class="stat-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <div><div class="stat-label">Connections</div><div class="stat-value">342</div></div>
+        </div>
+        <div class="stat-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+          <div><div class="stat-label">Recommendations</div><div class="stat-value">18</div></div>
+        </div>
+        <div style="border-top:1px solid #f3f4f6;margin-top:12px;padding-top:12px">
+          <div class="stat-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 0C1.46 6.7 1.33 10.28 4 13l8 8 8-8c2.67-2.72 2.54-6.3.42-8.42z"/></svg>
+            <div><div class="stat-label">Creator: Collaborations</div><div class="stat-value">12</div></div>
+          </div>
+          <div class="stat-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <div><div class="stat-label">Creator: Rating</div><div class="stat-value">4.7 / 5.0 <span style="color:#9ca3af;font-weight:400">(24)</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Groups & Organizations -->
+      <div class="sidebar-card">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Groups
+        </h3>
+        <div class="group-item">
+          <div class="group-name">Austin UX Collective</div>
+          <div class="group-role">Co-Organizer</div>
+        </div>
+        <div class="group-item">
+          <div class="group-name">IxDA Austin</div>
+          <div class="group-role">Member</div>
+        </div>
+      </div>
+
+      <!-- Memberships -->
+      <div class="sidebar-card">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+          Certifications
+        </h3>
+        <div class="group-item">
+          <div class="group-name">Google UX Design Certificate</div>
+          <div class="group-desc">Coursera / Google, 2023</div>
+        </div>
+        <div class="group-item">
+          <div class="group-name">Certified Accessibility Specialist</div>
+          <div class="group-desc">IAAP, 2024</div>
+        </div>
+      </div>
+
+      <!-- Education -->
+      <div class="sidebar-card">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 6 3 6 3s3 0 6-3v-5"/></svg>
+          Education
+        </h3>
+        <div class="edu-item">
+          <div class="edu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 6 3 6 3s3 0 6-3v-5"/></svg></div>
+          <div>
+            <div class="edu-name">University of Texas at Austin</div>
+            <div class="edu-detail">BFA Design &bull; 2018</div>
+          </div>
+        </div>
+        <div class="edu-item">
+          <div class="edu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+          <div>
+            <div class="edu-name">Westlake High School</div>
+            <div class="edu-detail">2014</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interests -->
+      <div class="sidebar-card">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          Interests
+        </h3>
+        <div class="interest-badges">
+          <span class="interest-badge">Design Systems</span>
+          <span class="interest-badge">AI/ML</span>
+          <span class="interest-badge">Photography</span>
+          <span class="interest-badge">Hiking</span>
+          <span class="interest-badge">Keyboards</span>
+          <span class="interest-badge">Board Games</span>
+        </div>
+      </div>
+
+      <!-- Social / Connect -->
+      <div class="sidebar-card">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Connect
+        </h3>
+        <div class="social-icons">
+          <a class="social-icon social-biz" title="Bizconekt Listing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></a>
+          <a class="social-icon social-web" title="Website"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></a>
+          <a class="social-icon social-ig" title="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+          <a class="social-icon social-yt" title="YouTube"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></a>
+          <a class="social-icon social-li" title="LinkedIn"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+          <a class="social-icon social-tw" title="Twitter/X"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg></a>
+        </div>
+      </div>
+
+      <!-- Creator Rate Card (merged) -->
+      <div class="sidebar-card">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Rate Card
+        </h3>
+        <div class="rate-row"><span class="rate-label">YouTube Integration</span><span class="rate-value">$2,500</span></div>
+        <div class="rate-row"><span class="rate-label">Instagram Reel</span><span class="rate-value">$1,200</span></div>
+        <div class="rate-row"><span class="rate-label">TikTok Video</span><span class="rate-value">$800</span></div>
+        <div class="rate-row"><span class="rate-label">Workshop/Event</span><span class="rate-value">$3,000</span></div>
+      </div>
+
+      <!-- Contact CTA -->
+      <div class="sidebar-card">
+        <button class="cta-btn">Request Collaboration</button>
+        <p style="text-align:center;font-size:12px;color:#9ca3af;margin-top:8px">47 brands have reached out</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

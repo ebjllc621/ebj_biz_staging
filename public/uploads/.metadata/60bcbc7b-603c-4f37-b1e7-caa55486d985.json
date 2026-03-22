@@ -1,0 +1,16 @@
+{
+  "id": "60bcbc7b-603c-4f37-b1e7-caa55486d985",
+  "filename": "sea-turtle.mp4",
+  "mimeType": "video/mp4",
+  "size": 27932506,
+  "url": "http://localhost:3000/uploads/review/16102/sea-turtle_60bcbc7b-603c-4f37-b1e7-caa55486d985.mp4",
+  "entityType": "review",
+  "entityId": "16102",
+  "createdAt": "2026-03-17T00:15:58.769Z",
+  "updatedAt": "2026-03-17T00:15:58.769Z",
+  "origin": "local",
+  "local": {
+    "path": "public\\uploads\\review\\16102\\sea-turtle_60bcbc7b-603c-4f37-b1e7-caa55486d985.mp4",
+    "url": "http://localhost:3000/uploads/review/16102/sea-turtle_60bcbc7b-603c-4f37-b1e7-caa55486d985.mp4"
+  }
+}

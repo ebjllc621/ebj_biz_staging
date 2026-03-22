@@ -1,0 +1,43 @@
+/**
+ * Admin Moderation Action API Routes
+ * PATCH /api/admin/moderation/[type]/[id] - Moderate item (approve/reject)
+ *
+ * @authority PHASE_5.2_BRAIN_PLAN.md - Section 4.2
+ */
+
+import { apiHandler, ApiContext } from '@core/api/apiHandler';
+import { createSuccessResponse } from '@core/api/responseHelpers';
+import { getDatabaseService } from '@core/services/DatabaseService';
+import { BizError } from '@core/errors/BizError';
+
+export const PATCH = apiHandler(async (context: ApiContext) => {
+  const { user, params, body } = context;
+
+  if (!user || user.role !== 'admin') {
+    throw BizError.unauthorized('Admin access required');
+  }
+
+  const type = (params as any).type as string;
+  const id = parseInt((params as any).id);
+  const { action, reason } = body as any;
+
+  const validTypes = ['listings', 'reviews', 'offers', 'events'];
+  if (!validTypes.includes(type)) {
+    throw BizError.badRequest('Invalid moderation type');
+  }
+
+  if (!['approve', 'reject'].includes(action)) {
+    throw BizError.badRequest('Invalid action');
+  }
+
+  const db = getDatabaseService();
+  const status = action === 'approve' ? 'approved' : 'rejected';
+
+  // Simplified update - actual implementation would use service methods
+  await db.query(
+    `UPDATE ${type} SET status = ?, moderated_at = NOW(), moderated_by = ?, moderation_reason = ? WHERE id = ?`,
+    [status, user.id, reason || null, id]
+  );
+
+  return createSuccessResponse({ success: true }, 200);
+});

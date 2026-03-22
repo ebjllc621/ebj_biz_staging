@@ -1,0 +1,345 @@
+/**
+ * GuidesListClient - Client Component for Guides List Page
+ *
+ * @component Client Component
+ * @tier STANDARD
+ * @phase Tier 2 Content Types - Phase G5
+ * @governance Build Map v2.1 ENHANCED
+ * @reference src/app/content/newsletters/NewslettersListClient.tsx
+ */
+'use client';
+
+import { useEffect, useState, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { AlertCircle, Clock, WifiOff, BookOpen } from 'lucide-react';
+
+import { ContentFilterBar } from '@/features/content/components/ContentFilterBar';
+import { GuideCard } from '@/features/content/components/GuideCard';
+import Pagination from '@/components/listings/Pagination';
+import type { Guide } from '@core/types/guide';
+
+interface PaginationState {
+  page: number;
+  pageSize: number;
+  total: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+interface GuidesResponse {
+  success: boolean;
+  data?: {
+    guides: Guide[];
+    pagination: {
+      page: number;
+      pageSize: number;
+      total: number;
+      hasNext: boolean;
+      hasPrev: boolean;
+    };
+  };
+  error?: {
+    code: string;
+    message: string;
+  };
+}
+
+function GuidesSkeleton() {
+  return (
+    <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-4">
+      {Array.from({ length: 10 }).map((_, index) => (
+        <div
+          key={index}
+          className="mb-4 break-inside-avoid animate-pulse bg-white rounded-xl overflow-hidden shadow-sm"
+        >
+          <div className="h-40 bg-gray-200" />
+          <div className="p-4 space-y-3">
+            <div className="h-3 bg-gray-200 rounded w-1/4" />
+            <div className="h-4 bg-gray-200 rounded w-3/4" />
+            <div className="h-3 bg-gray-200 rounded w-1/2" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+interface GuidesErrorProps {
+  message: string;
+  errorCode?: string | null;
+  onRetry: () => void;
+  isRetrying?: boolean;
+  retryCount?: number;
+  maxRetries?: number;
+}
+
+function GuidesError({
+  message,
+  errorCode,
+  onRetry,
+  isRetrying = false,
+  retryCount = 0,
+  maxRetries = 3,
+}: GuidesErrorProps) {
+  const isRateLimited = errorCode === 'RATE_LIMITED';
+  const isNetworkError = errorCode === 'NETWORK';
+  const canRetry = retryCount < maxRetries && !isRateLimited;
+
+  return (
+    <div className={`border rounded-lg p-6 text-center ${
+      isRateLimited ? 'bg-amber-50 border-amber-200' : 'bg-red-50 border-red-200'
+    }`}>
+      <div className="mb-4">
+        {isRateLimited ? (
+          <Clock className="w-12 h-12 text-amber-500 mx-auto" />
+        ) : isNetworkError ? (
+          <WifiOff className="w-12 h-12 text-red-500 mx-auto" />
+        ) : (
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto" />
+        )}
+      </div>
+      <h3 className={`text-lg font-semibold mb-2 ${
+        isRateLimited ? 'text-amber-800' : 'text-red-800'
+      }`}>
+        {isRateLimited ? 'Too Many Requests' :
+         isNetworkError ? 'Connection Error' :
+         'Unable to Load Guides'}
+      </h3>
+      <p className={`mb-4 ${isRateLimited ? 'text-amber-700' : 'text-red-700'}`}>
+        {isRateLimited
+          ? 'Please wait a moment before trying again.'
+          : message}
+      </p>
+      {retryCount > 0 && canRetry && (
+        <p className="text-sm text-gray-500 mb-4">
+          Attempt {retryCount} of {maxRetries}
+        </p>
+      )}
+      {canRetry && (
+        <button
+          onClick={onRetry}
+          disabled={isRetrying}
+          className={`px-4 py-2 rounded-md transition-colors ${
+            isRetrying
+              ? 'bg-gray-400 cursor-not-allowed'
+              : isRateLimited
+                ? 'bg-amber-600 text-white hover:bg-amber-700'
+                : 'bg-red-600 text-white hover:bg-red-700'
+          }`}
+        >
+          {isRetrying ? 'Retrying...' : 'Try Again'}
+        </button>
+      )}
+      {isRateLimited && (
+        <p className="mt-4 text-sm text-amber-600">
+          Automatic retry in 60 seconds
+        </p>
+      )}
+    </div>
+  );
+}
+
+function GuidesEmpty() {
+  return (
+    <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+      <BookOpen className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+      <h3 className="text-lg font-semibold text-gray-800 mb-2">
+        No Guides Found
+      </h3>
+      <p className="text-gray-600">
+        Try adjusting your search or filters to discover guides.
+      </p>
+    </div>
+  );
+}
+
+export function GuidesListClient() {
+  const searchParams = useSearchParams();
+
+  const [guides, setGuides] = useState<Guide[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const [isRetrying, setIsRetrying] = useState(false);
+  const [pagination, setPagination] = useState<PaginationState>({
+    page: 1,
+    pageSize: 20,
+    total: 0,
+    hasNext: false,
+    hasPrev: false,
+  });
+
+  const MAX_RETRIES = 3;
+
+  const currentPage = parseInt(searchParams.get('page') || '1', 10);
+  // Map 'category_featured' to 'recent' since guide API doesn't support it
+  const rawSort = searchParams.get('sort') || 'recent';
+  const currentSort = rawSort === 'category_featured' ? 'recent' : rawSort;
+  const currentQuery = searchParams.get('q') || '';
+  const currentFollowing = searchParams.get('following') === 'true';
+
+  const fetchGuides = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const params = new URLSearchParams();
+      params.set('page', currentPage.toString());
+      params.set('pageSize', '20');
+      params.set('sort', currentSort);
+      if (currentQuery) {
+        params.set('q', currentQuery);
+      }
+      if (currentFollowing) {
+        params.set('following', 'true');
+      }
+
+      const response = await fetch(`/api/content/guides?${params.toString()}`, {
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          throw Object.assign(new Error('Rate limited'), { code: 'RATE_LIMITED' });
+        }
+        if (response.status === 408 || response.status === 504) {
+          throw Object.assign(new Error('Request timeout'), { code: 'TIMEOUT' });
+        }
+        if (response.status >= 500) {
+          throw Object.assign(new Error('Server error'), { code: 'INTERNAL' });
+        }
+      }
+
+      const result: GuidesResponse = await response.json();
+
+      if (!result.success || !result.data) {
+        throw new Error(result.error?.message || 'Failed to load guides');
+      }
+
+      setGuides(result.data.guides);
+      setPagination({
+        page: result.data.pagination.page,
+        pageSize: result.data.pagination.pageSize,
+        total: result.data.pagination.total,
+        hasNext: result.data.pagination.hasNext,
+        hasPrev: result.data.pagination.hasPrev,
+      });
+    } catch (err) {
+      let code = 'INTERNAL';
+      let message = 'An unexpected error occurred';
+
+      if (err instanceof Error) {
+        message = err.message;
+        if (message.includes('rate') || message.includes('429')) {
+          code = 'RATE_LIMITED';
+        } else if (err.name === 'TypeError' && message.includes('fetch')) {
+          code = 'NETWORK';
+          message = 'Unable to connect. Please check your internet connection.';
+        }
+      }
+
+      setError(message);
+      setErrorCode(code);
+      setGuides([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentPage, currentSort, currentQuery, currentFollowing]);
+
+  useEffect(() => {
+    fetchGuides();
+  }, [fetchGuides]);
+
+  const handleRetry = useCallback(() => {
+    if (retryCount >= MAX_RETRIES) return;
+    setIsRetrying(true);
+    setRetryCount((prev) => prev + 1);
+    const delay = Math.min(1000 * Math.pow(2, retryCount), 8000);
+    setTimeout(() => {
+      setIsRetrying(false);
+      fetchGuides();
+    }, delay);
+  }, [retryCount, fetchGuides]);
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          Guides
+        </h1>
+        <p className="text-gray-600">
+          Browse step-by-step guides from local businesses and experts. Learn new skills with structured educational content.
+        </p>
+      </div>
+
+      <ContentFilterBar className="mb-6" hideTypeFilter={true} />
+
+      {/* "Learn Something New" Banner */}
+      {!isLoading && !error && (
+        <div className="mb-6 bg-gradient-to-r from-indigo-600 to-purple-700 rounded-xl p-6 text-white flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-bold mb-1">Learn Something New</h2>
+            <p className="text-sm text-indigo-200">
+              Explore step-by-step guides from experts. Track your progress and pick up where you left off.
+            </p>
+          </div>
+          <BookOpen className="w-10 h-10 text-indigo-300 flex-shrink-0 ml-4 hidden sm:block" />
+        </div>
+      )}
+
+      {!isLoading && !error && (
+        <div className="mb-4 text-sm text-gray-600">
+          Showing {guides.length} of {pagination.total} guides
+          {currentQuery && (
+            <span className="ml-1">
+              for &quot;<span className="font-medium">{currentQuery}</span>&quot;
+            </span>
+          )}
+        </div>
+      )}
+
+      {isLoading && <GuidesSkeleton />}
+
+      {error && !isLoading && (
+        <GuidesError
+          message={error}
+          errorCode={errorCode}
+          onRetry={handleRetry}
+          isRetrying={isRetrying}
+          retryCount={retryCount}
+          maxRetries={MAX_RETRIES}
+        />
+      )}
+
+      {!isLoading && !error && guides.length === 0 && <GuidesEmpty />}
+
+      {!isLoading && !error && guides.length > 0 && (
+        <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-4">
+          {guides.map((guide) => (
+            <div
+              key={`guide-${guide.id}`}
+              className="mb-4 break-inside-avoid"
+            >
+              <GuideCard guide={guide} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!isLoading && !error && guides.length > 0 && (
+        <Pagination
+          page={pagination.page}
+          pageSize={pagination.pageSize}
+          total={pagination.total}
+          hasNext={pagination.hasNext}
+          hasPrev={pagination.hasPrev}
+          basePath="/content/guides"
+          className="mt-8"
+        />
+      )}
+    </div>
+  );
+}
+
+export default GuidesListClient;

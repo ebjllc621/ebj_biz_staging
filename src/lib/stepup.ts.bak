@@ -1,0 +1,511 @@
+/**
+ * Step-Up Authentication Library
+ *
+ * Provides helper functions for implementing step-up authentication
+ * requiring recent MFA verification for sensitive operations.
+ *
+ * Security Features:
+ * - Time-based MFA verification requirements
+ * - Operation-specific step-up policies
+ * - Session-based step-up tracking
+ * - Configurable timeout policies
+ *
+ * Usage Examples:
+ * - Password changes
+ * - Account deletion
+ * - Financial transactions
+ * - Security settings modifications
+ *
+ * @see src/core/services/auth/MfaService.ts
+ * @see src/core/types/auth/mfa.ts
+ */
+
+import { DatabaseService } from '../core/services/DatabaseService';
+import { MfaService } from '../core/services/auth/MfaService';
+import { StepUpContext, StepUpResult, MfaMethod } from '../core/types/auth/mfa';
+import { BizError } from '../core/errors/BizError';
+
+/**
+ * Step-up authentication configuration
+ */
+export interface StepUpConfig {
+  /** Default maximum age of MFA verification in minutes */
+  defaultMaxAgeMinutes: number;
+  /** Required MFA methods for different operations */
+  operationPolicies: Record<string, {
+    maxAgeMinutes: number;
+    requiredMethods: MfaMethod[];
+    description: string;
+  }>;
+  /** Grace period for consecutive operations */
+  gracePeriodMinutes: number;
+}
+
+/**
+ * Default step-up configuration
+ */
+const DEFAULT_STEPUP_CONFIG: StepUpConfig = {
+  defaultMaxAgeMinutes: 15,
+  gracePeriodMinutes: 5,
+  operationPolicies: {
+    'password_change': {
+      maxAgeMinutes: 15,
+      requiredMethods: ['totp'],
+      description: 'Change account password'
+    },
+    'security_settings': {
+      maxAgeMinutes: 10,
+      requiredMethods: ['totp'],
+      description: 'Modify security settings'
+    },
+    'account_deletion': {
+      maxAgeMinutes: 5,
+      requiredMethods: ['totp'],
+      description: 'Delete account permanently'
+    },
+    'mfa_disable': {
+      maxAgeMinutes: 5,
+      requiredMethods: ['totp'],
+      description: 'Disable multi-factor authentication'
+    },
+    'recovery_codes_regenerate': {
+      maxAgeMinutes: 10,
+      requiredMethods: ['totp'],
+      description: 'Regenerate MFA recovery codes'
+    },
+    'admin_actions': {
+      maxAgeMinutes: 10,
+      requiredMethods: ['totp'],
+      description: 'Administrative actions'
+    },
+    'financial_operations': {
+      maxAgeMinutes: 5,
+      requiredMethods: ['totp'],
+      description: 'Financial transactions or billing changes'
+    }
+  }
+};
+
+/**
+ * Step-up authentication session tracking
+ */
+interface StepUpSession {
+  userId: number;
+  operation: string;
+  verifiedAt: Date;
+  expiresAt: Date;
+  method: MfaMethod;
+  ipAddress: string;
+}
+
+/**
+ * In-memory step-up session store (production should use Redis/database)
+ */
+const stepUpSessions = new Map<string, StepUpSession>();
+
+/**
+ * Step-up authentication helper class
+ */
+export class StepUpAuth {
+  private readonly database: DatabaseService;
+  private readonly mfaService: MfaService;
+  private readonly config: StepUpConfig;
+
+  constructor(
+    database: DatabaseService,
+    mfaService: MfaService,
+    config: Partial<StepUpConfig> = {}
+  ) {
+    this.database = database;
+    this.mfaService = mfaService;
+    this.config = { ...DEFAULT_STEPUP_CONFIG, ...config };
+  }
+
+  /**
+   * Check if step-up authentication is required for an operation
+   */
+  async requiresStepUp(context: StepUpContext): Promise<StepUpResult> {
+    const { userId, operation, maxAgeMinutes } = context;
+
+    // Get operation policy
+    const policy = this.config.operationPolicies[operation];
+    const maxAge = maxAgeMinutes || policy?.maxAgeMinutes || this.config.defaultMaxAgeMinutes;
+    const requiredMethods = policy?.requiredMethods || ['totp'];
+
+    // Check if user has MFA enabled
+    const mfaStatus = await this.mfaService.getMfaStatus(userId);
+    if (!mfaStatus.isEnabled) {
+      // If MFA is not enabled, step-up is not possible
+      return {
+        satisfied: false,
+        requiredActions: ['Enable MFA to perform this operation'],
+        expiresInMinutes: null
+      };
+    }
+
+    // Check existing step-up session
+    const sessionKey = this.getSessionKey(userId, operation);
+    const existingSession = stepUpSessions.get(sessionKey);
+
+    if (existingSession && existingSession.expiresAt > new Date()) {
+      const expiresInMinutes = Math.ceil(
+        (existingSession.expiresAt.getTime() - Date.now()) / (1000 * 60)
+      );
+
+      return {
+        satisfied: true,
+        requiredActions: [],
+        expiresInMinutes
+      };
+    }
+
+    // Check recent MFA verification
+    const cutoffTime = new Date(Date.now() - maxAge * 60 * 1000);
+    if (mfaStatus.lastUsedAt && new Date(mfaStatus.lastUsedAt) > cutoffTime) {
+      // Recent MFA verification exists, create step-up session
+      await this.createStepUpSession(userId, operation, 'totp', 'recent-mfa');
+
+      return {
+        satisfied: true,
+        requiredActions: [],
+        expiresInMinutes: maxAge
+      };
+    }
+
+    // Step-up required
+    return {
+      satisfied: false,
+      requiredActions: [`Verify with ${requiredMethods.join(' or ')} to continue`],
+      expiresInMinutes: null
+    };
+  }
+
+  /**
+   * Verify step-up authentication with TOTP
+   */
+  async verifyStepUp(
+    userId: number,
+    operation: string,
+    totpCode: string,
+    ipAddress: string = 'unknown'
+  ): Promise<StepUpResult> {
+    // Verify TOTP code
+    const verificationResult = await this.mfaService.verifyTotp(userId, {
+      code: totpCode,
+      isEnrollment: false
+    }, ipAddress);
+
+    if (!verificationResult.success) {
+      return {
+        satisfied: false,
+        requiredActions: [verificationResult.error || 'Invalid verification code'],
+        expiresInMinutes: null
+      };
+    }
+
+    // Create step-up session
+    await this.createStepUpSession(userId, operation, 'totp', ipAddress);
+
+    // Get operation policy for expiration time
+    const policy = this.config.operationPolicies[operation];
+    const maxAge = policy?.maxAgeMinutes || this.config.defaultMaxAgeMinutes;
+
+    return {
+      satisfied: true,
+      requiredActions: [],
+      expiresInMinutes: maxAge
+    };
+  }
+
+  /**
+   * Verify step-up authentication with recovery code
+   */
+  async verifyStepUpWithRecovery(
+    userId: number,
+    operation: string,
+    recoveryCode: string,
+    ipAddress: string = 'unknown'
+  ): Promise<StepUpResult> {
+    // Verify recovery code
+    const verificationResult = await this.mfaService.verifyRecoveryCode(userId, {
+      recoveryCode
+    }, ipAddress);
+
+    if (!verificationResult.success) {
+      return {
+        satisfied: false,
+        requiredActions: [verificationResult.error || 'Invalid recovery code'],
+        expiresInMinutes: null
+      };
+    }
+
+    // Create step-up session
+    await this.createStepUpSession(userId, operation, 'totp', ipAddress);
+
+    // Get operation policy for expiration time
+    const policy = this.config.operationPolicies[operation];
+    const maxAge = policy?.maxAgeMinutes || this.config.defaultMaxAgeMinutes;
+
+    return {
+      satisfied: true,
+      requiredActions: [],
+      expiresInMinutes: maxAge
+    };
+  }
+
+  /**
+   * Clear step-up session for user and operation
+   */
+  async clearStepUp(userId: number, operation: string): Promise<void> {
+    const sessionKey = this.getSessionKey(userId, operation);
+    stepUpSessions.delete(sessionKey);
+  }
+
+  /**
+   * Clear all step-up sessions for user
+   */
+  async clearAllStepUp(userId: number): Promise<void> {
+    const userPrefix = `user:${userId}:`;
+    for (const [key] of stepUpSessions) {
+      if (key.startsWith(userPrefix)) {
+        stepUpSessions.delete(key);
+      }
+    }
+  }
+
+  /**
+   * Get step-up session information
+   */
+  async getStepUpSession(userId: number, operation: string): Promise<StepUpSession | null> {
+    const sessionKey = this.getSessionKey(userId, operation);
+    const session = stepUpSessions.get(sessionKey);
+
+    if (session && session.expiresAt > new Date()) {
+      return session;
+    }
+
+    if (session) {
+      stepUpSessions.delete(sessionKey);
+    }
+
+    return null;
+  }
+
+  /**
+   * List available operations and their policies
+   */
+  getOperationPolicies(): Record<string, { maxAgeMinutes: number; requiredMethods: MfaMethod[]; description: string }> {
+    return { ...this.config.operationPolicies };
+  }
+
+  /**
+   * Create step-up session
+   */
+  private async createStepUpSession(
+    userId: number,
+    operation: string,
+    method: MfaMethod,
+    ipAddress: string
+  ): Promise<void> {
+    const policy = this.config.operationPolicies[operation];
+    const maxAge = policy?.maxAgeMinutes || this.config.defaultMaxAgeMinutes;
+
+    const session: StepUpSession = {
+      userId,
+      operation,
+      verifiedAt: new Date(),
+      expiresAt: new Date(Date.now() + maxAge * 60 * 1000),
+      method,
+      ipAddress
+    };
+
+    const sessionKey = this.getSessionKey(userId, operation);
+    stepUpSessions.set(sessionKey, session);
+
+    // Log step-up verification (optional audit trail)
+    try {
+      await this.database.query(
+        `INSERT INTO user_mfa_audit_log (user_id, event_type, method, ip_address, success, metadata)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          userId,
+          'mfa_verified_success',
+          method,
+          ipAddress,
+          true,
+          JSON.stringify({ operation, stepUp: true })
+        ]
+      );
+    } catch (error) {
+      // Audit logging failure shouldn't break step-up flow
+      console.warn('Failed to log step-up verification:', error);
+    }
+  }
+
+  /**
+   * Generate session key for user and operation
+   */
+  private getSessionKey(userId: number, operation: string): string {
+    return `user:${userId}:operation:${operation}`;
+  }
+
+  /**
+   * Clean expired sessions (should be called periodically)
+   */
+  static cleanExpiredSessions(): void {
+    const now = new Date();
+    for (const [key, session] of stepUpSessions) {
+      if (session.expiresAt <= now) {
+        stepUpSessions.delete(key);
+      }
+    }
+  }
+}
+
+/**
+ * Helper function to create step-up authentication instance
+ */
+export async function createStepUpAuth(config?: Partial<StepUpConfig>): Promise<StepUpAuth> {
+  // Initialize services (using stub pattern as per governance)
+  const databaseService = new DatabaseService({
+    name: 'DatabaseService',
+    database: {
+      host: 'localhost',
+      port: 3306,
+      database: 'bizconekt',
+      user: 'root',
+      password: ''
+    }
+  });
+
+  await databaseService.initialize();
+
+  const mfaService = new MfaService({
+    name: 'MfaService',
+    database: databaseService,
+    authSecret: process.env.AUTH_SECRET || 'development-secret',
+    mfaConfig: {
+      serviceName: 'Bizconekt',
+      recoveryCodeCount: 10,
+      recoveryCodeLength: 8,
+      maxFailures: 5,
+      lockoutDurationMinutes: 15,
+      totpWindow: 1
+    }
+  });
+
+  return new StepUpAuth(databaseService, mfaService, config);
+}
+
+/**
+ * Express/Next.js middleware for step-up authentication
+ */
+export function stepUpRequired(operation: string, config?: Partial<StepUpConfig>) {
+  return async (req: any, res: any, next: any) => {
+    try {
+      const userId = req.user?.id || req.userId;
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: 'Authentication required' }
+        });
+      }
+
+      const stepUpAuth = await createStepUpAuth(config);
+      const result = await stepUpAuth.requiresStepUp({
+        userId: parseInt(userId),
+        requiredMethods: ['totp'],
+        maxAgeMinutes: 15,
+        operation
+      });
+
+      if (!result.satisfied) {
+        return res.status(403).json({
+          success: false,
+          error: {
+            code: 'STEP_UP_REQUIRED',
+            message: 'Step-up authentication required',
+            details: {
+              operation,
+              requiredActions: result.requiredActions
+            }
+          }
+        });
+      }
+
+      // Step-up satisfied, continue
+      req.stepUpSession = await stepUpAuth.getStepUpSession(parseInt(userId), operation);
+      next();
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Step-up verification failed' }
+      });
+    }
+  };
+}
+
+/**
+ * React hook for step-up authentication
+ */
+export function useStepUp(operation: string) {
+  const [stepUpStatus, setStepUpStatus] = useState<StepUpResult | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const checkStepUp = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/auth/stepup/check', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ operation })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setStepUpStatus(data.data);
+      }
+    } catch (error) {
+      console.error('Step-up check failed:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyStepUp = async (code: string) => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/auth/stepup/verify', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ operation, code })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setStepUpStatus(data.data);
+        return data.data;
+      }
+    } catch (error) {
+      console.error('Step-up verification failed:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    stepUpStatus,
+    loading,
+    checkStepUp,
+    verifyStepUp
+  };
+}
+
+// Clean up expired sessions every 5 minutes
+if (typeof window === 'undefined') {
+  setInterval(() => {
+    StepUpAuth.cleanExpiredSessions();
+  }, 5 * 60 * 1000);
+}

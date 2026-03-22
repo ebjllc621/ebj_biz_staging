@@ -1,0 +1,41 @@
+/**
+ * Admin Menus API Routes
+ * GET /api/admin/menus - Get menu items by location
+ * POST /api/admin/menus - Create menu item
+ *
+ * @authority PHASE_5.2_BRAIN_PLAN.md - Section 4.4
+ */
+
+import { apiHandler, ApiContext } from '@core/api/apiHandler';
+import { createSuccessResponse } from '@core/api/responseHelpers';
+import { MenuService } from '@core/services/MenuService';
+import { BizError } from '@core/errors/BizError';
+
+export const GET = apiHandler(async (context: ApiContext) => {
+  const { user, request } = context;
+
+  if (!user || user.role !== 'admin') {
+    throw BizError.unauthorized('Admin access required');
+  }
+
+  const { searchParams } = new URL(request.url);
+  const location = searchParams.get('location') as any;
+
+  const menuService = new MenuService();
+  const items = await menuService.getMenuByLocation(location || 'header');
+
+  return createSuccessResponse({ items }, 200);
+});
+
+export const POST = apiHandler(async (context: ApiContext) => {
+  const { user, body } = context;
+
+  if (!user || user.role !== 'admin') {
+    throw BizError.unauthorized('Admin access required');
+  }
+
+  const menuService = new MenuService();
+  const item = await menuService.createMenuItem(body as any);
+
+  return createSuccessResponse({ item }, 200);
+});

@@ -1,0 +1,18 @@
+{
+  "id": "37b9a911-d3e4-4548-a6c7-effb4796dd20",
+  "filename": "download (2).jpg",
+  "mimeType": "image/jpeg",
+  "size": 9294,
+  "url": "http://localhost:3000/uploads/review/16102/download__2__37b9a911-d3e4-4548-a6c7-effb4796dd20.jpg",
+  "thumbnailUrl": "http://localhost:3000/uploads/review/16102/download (2)_37b9a911-d3e4-4548-a6c7-effb4796dd20_thumb.webp",
+  "entityType": "review",
+  "entityId": "16102",
+  "createdAt": "2026-03-17T00:15:38.910Z",
+  "updatedAt": "2026-03-17T00:15:38.910Z",
+  "origin": "local",
+  "local": {
+    "path": "public\\uploads\\review\\16102\\download__2__37b9a911-d3e4-4548-a6c7-effb4796dd20.jpg",
+    "url": "http://localhost:3000/uploads/review/16102/download__2__37b9a911-d3e4-4548-a6c7-effb4796dd20.jpg",
+    "thumb": "http://localhost:3000/uploads/review/16102/download (2)_37b9a911-d3e4-4548-a6c7-effb4796dd20_thumb.webp"
+  }
+}

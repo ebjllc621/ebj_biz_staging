@@ -1,0 +1,42 @@
+# Features Module Directory
+#
+# This directory contains self-contained business feature modules.
+# Each feature should be independent and not import from other features.
+#
+# Build Map v2.1 ENHANCED compliance:
+# - Features are self-contained modules
+# - Use core services through dependency injection
+# - Compose shared components for UI needs
+# - Follow single responsibility principle
+#
+# Architecture boundaries:
+# - Features can import: @core/*, @components/*, standard libraries
+# - Features cannot import: @features/*, app, lib layers, other features
+# - Features should not cross-communicate directly
+# - Use core services for data operations
+#
+# Example feature structure:
+# features/
+# ├── user-management/
+# │   ├── components/         - Feature-specific components
+# │   ├── services/          - Feature business logic (extends CoreService)
+# │   ├── types/             - Feature-specific types
+# │   ├── hooks/             - Feature-specific hooks
+# │   └── index.ts           - Feature public API
+# ├── listings/
+# │   ├── components/
+# │   ├── services/
+# │   └── ...
+# └── dashboard/
+#     ├── components/
+#     ├── services/
+#     └── ...
+#
+# Feature isolation principles:
+# - Features expose public APIs through index.ts
+# - Features use core services for shared functionality
+# - Features compose shared components for consistent UI
+# - Features handle their own state management
+# - Features define their own types and interfaces
+#
+# BUILD_V5.0 P1 Service Foundation - Features ready for implementation ✓

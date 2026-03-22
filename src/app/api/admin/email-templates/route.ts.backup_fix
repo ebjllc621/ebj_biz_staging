@@ -1,0 +1,56 @@
+/**
+ * Admin Email Templates API Routes
+ * GET /api/admin/email-templates - Get all email templates
+ * POST /api/admin/email-templates - Create email template
+ *
+ * @authority PHASE_5.2_BRAIN_PLAN.md - Section 4.5
+ */
+
+import { apiHandler, ApiContext } from '@core/api/apiHandler';
+import { createSuccessResponse } from '@core/api/responseHelpers';
+import { getDatabaseService } from '@core/services/DatabaseService';
+import { BizError } from '@core/errors/BizError';
+
+export const GET = apiHandler(async (context: ApiContext) => {
+  const { user } = context;
+
+  if (!user || user.role !== 'admin') {
+    throw BizError.unauthorized('Admin access required');
+  }
+
+  const db = getDatabaseService();
+  const results = await db.query('SELECT * FROM email_templates ORDER BY category, name');
+
+  return createSuccessResponse({ templates: results.rows }, 200);
+});
+
+export const POST = apiHandler(async (context: ApiContext) => {
+  const { user, body } = context;
+
+  if (!user || user.role !== 'admin') {
+    throw BizError.unauthorized('Admin access required');
+  }
+
+  const { name, category, subject, body_html, body_text, available_variables, is_active } = body as any;
+
+  if (!name || !subject) {
+    throw BizError.badRequest('Name and subject are required');
+  }
+
+  const db = getDatabaseService();
+  const result = await db.query(
+    `INSERT INTO email_templates (name, category, subject, body_html, body_text, available_variables, is_active)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [
+      name,
+      category,
+      subject,
+      body_html || '',
+      body_text || '',
+      JSON.stringify(available_variables || []),
+      is_active !== false
+    ]
+  );
+
+  return createSuccessResponse({ id: result.insertId }, 200);
+});

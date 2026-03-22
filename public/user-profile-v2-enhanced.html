@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Profile v2 — Enhanced Card Layout — Bizconekt</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #f9fafb; color: #1a1a2e; line-height: 1.6; }
+
+  .container { max-width: 80rem; margin: 0 auto; padding: 0 16px; }
+
+  /* View Mode Bar */
+  .view-mode-bar { background: #fff; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 50; }
+  .view-mode-inner { max-width: 80rem; margin: 0 auto; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  .view-mode-left { display: flex; align-items: center; gap: 12px; }
+  .view-mode-label { font-size: 13px; color: #6b7280; font-weight: 500; }
+  .view-toggle { display: flex; background: #f3f4f6; border-radius: 8px; overflow: hidden; border: 1px solid #e5e7eb; }
+  .view-toggle button { padding: 6px 16px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; background: transparent; color: #6b7280; }
+  .view-toggle button.active { background: #022641; color: #fff; }
+
+  /* Profile Mode Selector */
+  .profile-mode { display: flex; background: #fef3c7; border: 1px solid #fde68a; border-radius: 8px; overflow: hidden; margin-left: 12px; }
+  .profile-mode button { padding: 6px 14px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; background: transparent; color: #92400e; transition: all 0.2s; }
+  .profile-mode button.active { background: #f59e0b; color: #fff; }
+  .profile-mode button:hover:not(.active) { background: #fef9c3; }
+
+  .edit-actions { display: flex; gap: 8px; }
+  .btn-edit { display: inline-flex; align-items: center; gap: 6px; padding: 6px 16px; font-size: 13px; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; }
+  .btn-edit-primary { background: #ed6437; color: #fff; }
+  .btn-edit-primary:hover { background: #d55a31; }
+  .btn-edit-secondary { background: #fff; color: #374151; border: 1px solid #d1d5db; }
+
+  /* Hero — Full-width cover with floating info card */
+  .hero-section { position: relative; margin-top: 16px; }
+  .cover-banner { width: 100%; height: 220px; background: linear-gradient(135deg, #022641, #0a3d6b, #1565a0); border-radius: 12px 12px 0 0; position: relative; overflow: hidden; }
+  .cover-banner::after { content: ''; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+
+  /* Floating hero card */
+  .hero-float-card { background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); margin: -60px 24px 0; position: relative; z-index: 10; padding: 24px; display: flex; gap: 20px; align-items: flex-start; }
+
+  .avatar-section { flex-shrink: 0; }
+  .avatar { width: 120px; height: 120px; border-radius: 16px; border: 4px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); overflow: hidden; background: #022641; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 36px; font-weight: 700; margin-top: -40px; }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+  .hero-content { flex: 1; min-width: 0; }
+  .hero-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .hero-name-row h1 { font-size: 28px; font-weight: 700; color: #022641; }
+  .tier-badge { padding: 2px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600; }
+  .tier-plus { background: #dbeafe; color: #1d4ed8; }
+  .creator-tag { padding: 2px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; background: linear-gradient(135deg, #ed6437, #f59e0b); color: #fff; }
+  .hero-headline { color: #6b7280; margin-top: 4px; font-size: 15px; }
+
+  .hero-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 10px; font-size: 13px; color: #9ca3af; }
+  .hero-meta span { display: flex; align-items: center; gap: 4px; }
+  .hero-meta svg { width: 14px; height: 14px; }
+
+  .hero-actions-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #f3f4f6; }
+  .btn-primary { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; font-size: 14px; background: #ed6437; color: #fff; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; }
+  .btn-primary:hover { background: #d55a31; }
+  .btn-secondary { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; font-size: 14px; font-weight: 600; border-radius: 8px; border: 2px solid #d1d5db; color: #374151; background: #fff; cursor: pointer; }
+  .btn-secondary:hover { border-color: #022641; }
+
+  /* Quick Stats Strip */
+  .stats-strip { display: flex; gap: 0; background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-top: 16px; overflow: hidden; border: 1px solid #f3f4f6; }
+  .stat-pill { flex: 1; text-align: center; padding: 16px 12px; border-right: 1px solid #f3f4f6; }
+  .stat-pill:last-child { border-right: none; }
+  .stat-pill .number { font-size: 22px; font-weight: 700; color: #022641; }
+  .stat-pill .label { font-size: 12px; color: #9ca3af; margin-top: 2px; }
+
+  /* Main Grid */
+  .main-grid { display: grid; grid-template-columns: 1fr; gap: 24px; margin-top: 24px; padding-bottom: 60px; }
+  @media (min-width: 1024px) { .main-grid { grid-template-columns: 2fr 1fr; } }
+
+  /* Cards */
+  .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #f3f4f6; padding: 24px; margin-bottom: 20px; }
+  .card h2 { font-size: 18px; font-weight: 600; color: #022641; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .card h2 svg { width: 20px; height: 20px; color: #ed6437; flex-shrink: 0; }
+  .bio-text { color: #374151; line-height: 1.7; white-space: pre-line; }
+  .skill-badges { display: flex; flex-wrap: wrap; gap: 8px; }
+  .skill-badge { background: #022641; color: #fff; padding: 4px 14px; border-radius: 9999px; font-size: 13px; font-weight: 500; }
+  .interest-badge { background: #F5A882; color: #022641; padding: 4px 14px; border-radius: 9999px; font-size: 13px; font-weight: 500; }
+
+  /* Two-column info grid inside cards */
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .info-grid { grid-template-columns: 1fr; } }
+  .info-cell { }
+  .info-cell .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #9ca3af; font-weight: 600; margin-bottom: 4px; }
+  .info-cell .value { font-size: 14px; color: #022641; font-weight: 500; }
+
+  /* Groups */
+  .group-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f3f4f6; }
+  .group-item:last-child { border-bottom: none; }
+  .group-icon { width: 36px; height: 36px; border-radius: 8px; background: #eef2ff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .group-icon svg { width: 18px; height: 18px; color: #4338ca; }
+  .group-name { font-weight: 600; color: #022641; font-size: 14px; }
+  .group-role { font-size: 12px; color: #6b7280; }
+
+  /* Creator section */
+  .creator-section-header { display: flex; align-items: center; gap: 8px; margin: 32px 0 16px; }
+  .creator-section-header .icon { width: 28px; height: 28px; border-radius: 6px; background: linear-gradient(135deg, #ed6437, #f59e0b); display: flex; align-items: center; justify-content: center; }
+  .creator-section-header .icon svg { width: 16px; height: 16px; color: #fff; }
+  .creator-section-header h2 { font-size: 20px; font-weight: 700; color: #022641; }
+  .creator-section-header .type { font-size: 12px; color: #ed6437; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  .collab-list { display: flex; flex-direction: column; gap: 12px; }
+  .collab-row { display: flex; align-items: center; gap: 16px; padding: 16px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; transition: border-color 0.2s; }
+  .collab-row:hover { border-color: #d1d5db; }
+  .collab-logo { width: 48px; height: 48px; border-radius: 10px; background: #fff; border: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; color: #6b7280; flex-shrink: 0; }
+  .collab-info { flex: 1; min-width: 0; }
+  .collab-info .name { font-weight: 600; color: #022641; font-size: 15px; }
+  .collab-info .type-badge { display: inline-block; background: #eef2ff; color: #4338ca; font-size: 11px; padding: 1px 8px; border-radius: 4px; margin-left: 8px; }
+  .collab-info .desc { font-size: 13px; color: #6b7280; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .collab-metric { text-align: right; flex-shrink: 0; }
+  .collab-metric .value { font-size: 16px; font-weight: 700; color: #ed6437; }
+  .collab-metric .label { font-size: 11px; color: #9ca3af; }
+
+  /* Panels */
+  .panel-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.06); border: 1px solid #f3f4f6; padding: 20px; margin-bottom: 16px; position: relative; }
+  .panel-card .drag-handle { position: absolute; top: 8px; left: 8px; width: 20px; height: 20px; color: #d1d5db; cursor: grab; }
+  .panel-card h3 { font-size: 16px; font-weight: 600; color: #022641; margin-bottom: 12px; padding-left: 24px; }
+  .panel-manage-bar { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #f9fafb; border: 1px dashed #d1d5db; border-radius: 8px; margin-bottom: 16px; }
+  .panel-manage-bar span { font-size: 13px; color: #6b7280; }
+
+  /* Sidebar */
+  .sidebar { display: flex; flex-direction: column; gap: 16px; }
+  .sidebar-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #f3f4f6; padding: 24px; }
+  .sidebar-card h3 { font-size: 16px; font-weight: 600; color: #022641; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .sidebar-card h3 svg { width: 20px; height: 20px; color: #ed6437; }
+
+  /* Education */
+  .edu-item { display: flex; gap: 12px; padding: 8px 0; }
+  .edu-icon { width: 36px; height: 36px; border-radius: 8px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .edu-icon svg { width: 18px; height: 18px; color: #6b7280; }
+  .edu-name { font-weight: 600; color: #022641; font-size: 14px; }
+  .edu-detail { font-size: 13px; color: #6b7280; }
+
+  /* Social */
+  .social-icons { display: flex; flex-wrap: wrap; gap: 8px; }
+  .social-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; transition: transform 0.2s; }
+  .social-icon:hover { transform: scale(1.1); }
+  .social-icon svg { width: 18px; height: 18px; }
+  .social-biz { background: #F5A882; }
+  .social-web { background: #9ca3af; }
+  .social-ig { background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045); }
+  .social-yt { background: #FF0000; }
+  .social-li { background: #0A66C2; }
+  .social-tw { background: #1a1a2e; }
+  .social-tt { background: #000; }
+
+  .cta-btn { width: 100%; padding: 12px; background: #ed6437; color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; }
+  .cta-btn:hover { background: #d55a31; }
+  .rate-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f3f4f6; }
+  .rate-row:last-child { border-bottom: none; }
+  .rate-label { font-size: 13px; color: #6b7280; }
+  .rate-value { font-size: 14px; font-weight: 600; color: #022641; }
+
+  @media (max-width: 1023px) {
+    .hero-float-card { margin: -40px 12px 0; flex-direction: column; align-items: center; text-align: center; }
+    .avatar { margin-top: -30px; width: 96px; height: 96px; font-size: 28px; }
+    .hero-name-row { justify-content: center; }
+    .hero-meta { justify-content: center; }
+    .hero-actions-row { justify-content: center; }
+    .cover-banner { height: 160px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- View Mode Bar -->
+<div class="view-mode-bar">
+  <div class="view-mode-inner">
+    <div class="view-mode-left">
+      <span class="view-mode-label">View as:</span>
+      <div class="view-toggle">
+        <button class="active">Edit View</button>
+        <button>Published View</button>
+      </div>
+      <div class="profile-mode">
+        <button>Personal Only</button>
+        <button class="active">Merged</button>
+        <button>Creator Only</button>
+      </div>
+    </div>
+    <div class="edit-actions">
+      <button class="btn-edit btn-edit-secondary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Manage Panels
+      </button>
+      <button class="btn-edit btn-edit-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit Profile
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Hero Section -->
+  <div class="hero-section">
+    <div class="cover-banner"></div>
+    <div class="hero-float-card">
+      <div class="avatar-section">
+        <div class="avatar">MC</div>
+      </div>
+      <div class="hero-content">
+        <div class="hero-name-row">
+          <h1>Marcus Chen</h1>
+          <span class="tier-badge tier-plus">Preferred Member</span>
+          <span class="creator-tag">Podcaster</span>
+        </div>
+        <p class="hero-headline">Audio Engineer, Tech Journalist &amp; Podcast Host</p>
+        <div class="hero-meta">
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> San Francisco, CA</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Member since Oct 2023</span>
+          <span style="color:#d97706;font-weight:600">4.7 (89 reviews)</span>
+        </div>
+        <div class="hero-actions-row">
+          <button class="btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+            Connect
+          </button>
+          <button class="btn-secondary">Follow</button>
+          <button class="btn-secondary">Message</button>
+          <button class="btn-secondary">Share</button>
+          <button class="btn-secondary">Recommend</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Strip -->
+  <div class="stats-strip">
+    <div class="stat-pill"><div class="number">342</div><div class="label">Connections</div></div>
+    <div class="stat-pill"><div class="number">1,891</div><div class="label">Profile Views</div></div>
+    <div class="stat-pill"><div class="number">312</div><div class="label">Episodes</div></div>
+    <div class="stat-pill"><div class="number">245K</div><div class="label">Listeners</div></div>
+    <div class="stat-pill"><div class="number">4.7</div><div class="label">Rating</div></div>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="main-grid">
+    <!-- Content Column -->
+    <div>
+      <!-- About -->
+      <div class="card">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> About</h2>
+        <p class="bio-text">Audio engineer turned tech journalist with a love for long-form conversations about technology's impact on society. I host "The Binary Perspective" — a weekly podcast where I sit down with founders, engineers, and designers to explore the human stories behind the tech we use every day.
+
+When I'm not recording, I'm hiking the Bay Area trails, building audio gear, or volunteering at a local youth coding program.</p>
+      </div>
+
+      <!-- Quick Info Grid -->
+      <div class="card">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Details</h2>
+        <div class="info-grid">
+          <div class="info-cell"><div class="label">Occupation</div><div class="value">Audio Engineer &amp; Journalist</div></div>
+          <div class="info-cell"><div class="label">Hometown</div><div class="value">Portland, OR</div></div>
+          <div class="info-cell"><div class="label">Education</div><div class="value">Stanford University — MS Audio Engineering</div></div>
+          <div class="info-cell"><div class="label">Show</div><div class="value">The Binary Perspective (Weekly)</div></div>
+        </div>
+      </div>
+
+      <!-- Skills -->
+      <div class="card">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg> Skills</h2>
+        <div class="skill-badges">
+          <span class="skill-badge">Audio Production</span>
+          <span class="skill-badge">Podcast Editing</span>
+          <span class="skill-badge">Interviewing</span>
+          <span class="skill-badge">Sound Design</span>
+          <span class="skill-badge">Pro Tools</span>
+          <span class="skill-badge">Adobe Audition</span>
+          <span class="skill-badge">Technical Writing</span>
+        </div>
+      </div>
+
+      <!-- Groups -->
+      <div class="card">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Groups &amp; Organizations</h2>
+        <div class="group-item">
+          <div class="group-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div>
+          <div><div class="group-name">SF Podcast Alliance</div><div class="group-role">Co-Founder</div></div>
+        </div>
+        <div class="group-item">
+          <div class="group-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+          <div><div class="group-name">Online News Association</div><div class="group-role">Member</div></div>
+        </div>
+        <div class="group-item">
+          <div class="group-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+          <div><div class="group-name">Code for America — Bay Area</div><div class="group-role">Volunteer Mentor</div></div>
+        </div>
+      </div>
+
+      <!-- Creator Section: Guest Collaborations -->
+      <div class="creator-section-header">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/></svg></div>
+        <div>
+          <h2 style="margin:0">Recent Guests</h2>
+          <span class="type">The Binary Perspective</span>
+        </div>
+      </div>
+
+      <div class="collab-list">
+        <div class="collab-row">
+          <div class="collab-logo">KS</div>
+          <div class="collab-info">
+            <div class="name">Kai Sato <span class="type-badge">Founder</span></div>
+            <div class="desc">Ep 308: Building AI tools that respect privacy — a conversation with Kai Sato, founder of DataShield</div>
+          </div>
+          <div class="collab-metric"><div class="value">42K</div><div class="label">Plays</div></div>
+        </div>
+        <div class="collab-row">
+          <div class="collab-logo">AR</div>
+          <div class="collab-info">
+            <div class="name">Aisha Rahman <span class="type-badge">CTO</span></div>
+            <div class="desc">Ep 305: The future of audio interfaces and spatial computing</div>
+          </div>
+          <div class="collab-metric"><div class="value">38K</div><div class="label">Plays</div></div>
+        </div>
+        <div class="collab-row">
+          <div class="collab-logo">JM</div>
+          <div class="collab-info">
+            <div class="name">James Morrison <span class="type-badge">Designer</span></div>
+            <div class="desc">Ep 301: Design leadership in the age of generative AI</div>
+          </div>
+          <div class="collab-metric"><div class="value">51K</div><div class="label">Plays</div></div>
+        </div>
+      </div>
+
+      <!-- Draggable Panels -->
+      <div style="margin-top:24px">
+        <div class="panel-manage-bar">
+          <span>Drag to reorder &bull; Toggle visibility</span>
+          <button class="btn-edit btn-edit-secondary" style="font-size:12px;padding:4px 12px;">Reset</button>
+        </div>
+        <div class="panel-card">
+          <svg class="drag-handle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+          <h3>Recommendations</h3>
+          <p style="color:#6b7280;font-size:14px">12 recommendations received</p>
+        </div>
+        <div class="panel-card">
+          <svg class="drag-handle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+          <h3>Associated Listings</h3>
+          <p style="color:#6b7280;font-size:14px">1 listing</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <!-- Education -->
+      <div class="sidebar-card">
+        <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 6 3 6 3s3 0 6-3v-5"/></svg> Education</h3>
+        <div class="edu-item">
+          <div class="edu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/></svg></div>
+          <div><div class="edu-name">Stanford University</div><div class="edu-detail">MS Audio Engineering &bull; 2018</div></div>
+        </div>
+        <div class="edu-item">
+          <div class="edu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+          <div><div class="edu-name">Oregon State University</div><div class="edu-detail">BS Electrical Engineering &bull; 2016</div></div>
+        </div>
+      </div>
+
+      <!-- Interests -->
+      <div class="sidebar-card">
+        <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg> Interests</h3>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <span class="interest-badge">Audio Tech</span>
+          <span class="interest-badge">Hiking</span>
+          <span class="interest-badge">Mechanical Keyboards</span>
+          <span class="interest-badge">Vinyl Records</span>
+          <span class="interest-badge">Privacy Tech</span>
+        </div>
+      </div>
+
+      <!-- Podcast Rate Card -->
+      <div class="sidebar-card">
+        <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Guest Booking</h3>
+        <div class="rate-row"><span class="rate-label">Standard Episode</span><span class="rate-value">$500</span></div>
+        <div class="rate-row"><span class="rate-label">Premium (2-part)</span><span class="rate-value">$1,200</span></div>
+        <div class="rate-row"><span class="rate-label">Live Recording</span><span class="rate-value">$2,000</span></div>
+        <div class="rate-row"><span class="rate-label">Sponsored Series</span><span class="rate-value">Custom</span></div>
+      </div>
+
+      <!-- Social -->
+      <div class="sidebar-card">
+        <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/></svg> Connect</h3>
+        <div class="social-icons">
+          <a class="social-icon social-biz" title="Listing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></a>
+          <a class="social-icon social-web" title="Website"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg></a>
+          <a class="social-icon social-yt" title="YouTube"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><polygon points="5 3 19 12 5 21"/></svg></a>
+          <a class="social-icon social-tw" title="Twitter"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5"/></svg></a>
+          <a class="social-icon social-li" title="LinkedIn"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="sidebar-card">
+        <button class="cta-btn">Book as Guest</button>
+        <p style="text-align:center;font-size:12px;color:#9ca3af;margin-top:8px">74 bookings this year</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

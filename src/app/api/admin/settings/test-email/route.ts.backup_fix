@@ -1,0 +1,30 @@
+/**
+ * Admin Test Email API Routes
+ * POST /api/admin/settings/test-email - Send test email
+ *
+ * @authority PHASE_5.2_BRAIN_PLAN.md - Section 4.3
+ */
+
+import { apiHandler, ApiContext } from '@core/api/apiHandler';
+import { createSuccessResponse } from '@core/api/responseHelpers';
+import { BizError } from '@core/errors/BizError';
+
+export const POST = apiHandler(async (context: ApiContext) => {
+  const { user, body } = context;
+
+  if (!user || user.role !== 'admin') {
+    throw BizError.unauthorized('Admin access required');
+  }
+
+  const { email } = body as any;
+
+  if (!email) {
+    throw BizError.badRequest('Email address required');
+  }
+
+  // TODO: Implement actual email sending via MailSender service
+  // For now, return success to unblock development
+  console.log(`Test email would be sent to: ${email}`);
+
+  return createSuccessResponse({ success: true, message: 'Test email sent' });
+});

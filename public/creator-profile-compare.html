@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Creator Profile Preview — Bizconekt</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f0f1a; color: #e0e0e0; padding: 20px; min-height: 100vh; }
+
+  h1 { text-align: center; margin-bottom: 8px; color: #ed6437; font-size: 28px; }
+  .subtitle { text-align: center; color: #888; margin-bottom: 24px; font-size: 14px; }
+
+  /* Section headers */
+  .section-header { margin: 32px 0 16px; padding: 12px 20px; background: linear-gradient(90deg, #1a1a2e 0%, #12121f 100%); border: 1px solid #2a2a3e; border-radius: 10px; display: flex; align-items: center; gap: 12px; }
+  .section-header:first-of-type { margin-top: 0; }
+  .section-header h2 { font-size: 18px; font-weight: 700; color: #e0e0e0; }
+  .section-header .badge { font-size: 11px; padding: 3px 10px; border-radius: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .badge-creative { background: #2a1a12; color: #ed6437; }
+  .badge-accurate { background: #0a2a1a; color: #6ee7b7; }
+  .section-header .section-desc { font-size: 13px; color: #666; margin-left: auto; }
+
+  /* Profile type filter controls */
+  .controls { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
+  .controls button { padding: 10px 20px; border: 1px solid #333; background: #1a1a2e; color: #ccc; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
+  .controls button:hover { border-color: #ed6437; color: #ed6437; }
+  .controls button.active { background: #ed6437; color: #fff; border-color: #ed6437; }
+  .controls button svg { width: 18px; height: 18px; }
+
+  /* Layout controls */
+  .layout-controls { display: flex; gap: 8px; justify-content: center; margin-bottom: 24px; align-items: center; }
+  .layout-controls span { color: #666; font-size: 13px; margin-right: 8px; }
+  .layout-controls button { padding: 8px 16px; border: 1px solid #333; background: #1a1a2e; color: #ccc; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; }
+  .layout-controls button.active { background: #333; color: #fff; border-color: #555; }
+  .layout-controls button:hover { border-color: #ed6437; color: #ed6437; }
+
+  /* Grid */
+  .grid { display: grid; gap: 24px; transition: all 0.3s; }
+  .grid.cols-1 { grid-template-columns: 1fr; max-width: 900px; margin: 0 auto; }
+  .grid.cols-2 { grid-template-columns: 1fr 1fr; }
+  .grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  /* Cards */
+  .card { background: #1a1a2e; border: 1px solid #2a2a3e; border-radius: 14px; overflow: hidden; transition: all 0.3s; }
+  .card:hover { border-color: #ed6437; box-shadow: 0 4px 24px rgba(237,100,55,0.1); }
+  .card.hidden { display: none; }
+
+  .card-header { padding: 16px 20px; background: #12121f; border-bottom: 1px solid #2a2a3e; display: flex; justify-content: space-between; align-items: center; }
+  .card-header h3 { font-size: 16px; font-weight: 700; }
+  .card-header .profile-type { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 4px 12px; border-radius: 12px; font-weight: 600; }
+  .type-affiliate { background: #2a1a12; color: #ed6437; }
+  .type-ip { background: #1a122a; color: #a78bfa; }
+  .type-podcaster { background: #0a2a1a; color: #6ee7b7; }
+
+  .card-description { padding: 10px 20px; font-size: 13px; color: #666; border-bottom: 1px solid #1f1f30; }
+
+  .preview-frame { width: 100%; border: none; background: #fff; border-radius: 0; }
+  .preview-frame.tall { height: 700px; }
+  .preview-frame.medium { height: 500px; }
+  .preview-frame.short { height: 380px; }
+
+  .card-footer { padding: 12px 20px; background: #12121f; border-top: 1px solid #2a2a3e; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .card-footer .info { font-size: 12px; color: #555; display: flex; align-items: center; gap: 6px; }
+  .card-footer .info svg { width: 14px; height: 14px; }
+  .card-footer .actions { display: flex; gap: 8px; }
+  .card-footer button { padding: 6px 14px; font-size: 12px; font-weight: 600; border: 1px solid #333; background: transparent; color: #aaa; border-radius: 6px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+  .card-footer button:hover { border-color: #ed6437; color: #ed6437; }
+  .card-footer button svg { width: 14px; height: 14px; }
+  .card-footer button.primary { background: #ed6437; color: #fff; border-color: #ed6437; }
+  .card-footer button.primary:hover { background: #d55a31; }
+
+  /* Back link */
+  .back-link { display: inline-flex; align-items: center; gap: 8px; color: #888; text-decoration: none; font-size: 14px; margin-bottom: 20px; transition: color 0.2s; }
+  .back-link:hover { color: #ed6437; }
+  .back-link svg { width: 16px; height: 16px; }
+
+  /* Stats bar inside card */
+  .card-stats { padding: 10px 20px; background: #16162a; border-bottom: 1px solid #2a2a3e; display: flex; gap: 20px; flex-wrap: wrap; }
+  .card-stat { font-size: 12px; color: #888; }
+  .card-stat strong { color: #ed6437; font-weight: 700; }
+
+  /* Empty state */
+  .empty-state { text-align: center; padding: 80px 20px; }
+  .empty-state h2 { color: #666; font-size: 20px; margin-bottom: 8px; }
+  .empty-state p { color: #555; font-size: 14px; }
+
+  /* Divider between sections */
+  .section-divider { border: none; border-top: 1px solid #2a2a3e; margin: 8px 0; }
+
+  @media (max-width: 1200px) { .grid.cols-3 { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 800px) {
+    .grid.cols-2, .grid.cols-3 { grid-template-columns: 1fr; }
+    body { padding: 12px; }
+    h1 { font-size: 22px; }
+    .section-header { flex-wrap: wrap; }
+    .section-header .section-desc { margin-left: 0; margin-top: 4px; }
+  }
+</style>
+</head>
+<body>
+
+<a href="javascript:window.close()" class="back-link">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+  Close Preview
+</a>
+
+<h1>Creator Profile Preview</h1>
+<p class="subtitle">Visual mockups of all creator profile page types — creative concepts & code-accurate representations</p>
+
+<!-- Profile type filters -->
+<div class="controls" id="filters">
+  <button class="active" data-filter="all" onclick="setFilter('all')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    All Profiles
+  </button>
+  <button data-filter="affiliate" onclick="setFilter('affiliate')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+    Affiliate Marketer
+  </button>
+  <button data-filter="ip" onclick="setFilter('ip')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Internet Personality
+  </button>
+  <button data-filter="podcaster" onclick="setFilter('podcaster')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+    Podcaster
+  </button>
+</div>
+
+<!-- Layout controls -->
+<div class="layout-controls">
+  <span>Layout:</span>
+  <button onclick="setLayout(1)" id="lay1">Single</button>
+  <button onclick="setLayout(2)" id="lay2">Side by Side</button>
+  <button onclick="setLayout(3)" id="lay3" class="active">Triple</button>
+</div>
+
+<!-- Creative Concepts Section -->
+<div class="section-header">
+  <h2>Creative Concepts</h2>
+  <span class="badge badge-creative">Design Vision</span>
+  <span class="section-desc">Aspirational mockups showcasing visual design direction</span>
+</div>
+<div class="grid cols-3 section-grid" id="grid-creative"></div>
+
+<hr class="section-divider">
+
+<!-- Code-Accurate Section -->
+<div class="section-header">
+  <h2>Code-Accurate</h2>
+  <span class="badge badge-accurate">Matches Codebase</span>
+  <span class="section-desc">Faithful representation of what the current code actually renders</span>
+</div>
+<div class="grid cols-3 section-grid" id="grid-accurate"></div>
+
+<script>
+const CREATIVE_PROFILES = [
+  {
+    id: 'affiliate-creative',
+    name: 'Sarah Mitchell',
+    type: 'affiliate',
+    typeLabel: 'Affiliate Marketer',
+    typeClass: 'type-affiliate',
+    description: 'Performance-driven marketer with 8+ years experience, 247 campaigns, and 8.4% avg conversion rate.',
+    src: '/creator-profile-affiliate.html',
+    infoLabel: 'Creative Concept',
+    stats: [
+      { label: 'Campaigns', value: '247' },
+      { label: 'Conversion', value: '8.4%' },
+      { label: 'Rating', value: '4.9' },
+      { label: 'Reviews', value: '42' }
+    ]
+  },
+  {
+    id: 'ip-creative',
+    name: 'Alex Rivera',
+    type: 'ip',
+    typeLabel: 'Internet Personality',
+    typeClass: 'type-ip',
+    description: 'Tech creator with 2.4M reach, 6.8% engagement rate, and 87 brand collaborations.',
+    src: '/creator-profile-ip.html',
+    infoLabel: 'Creative Concept',
+    stats: [
+      { label: 'Reach', value: '2.4M' },
+      { label: 'Engagement', value: '6.8%' },
+      { label: 'Rating', value: '4.8' },
+      { label: 'Collabs', value: '87' }
+    ]
+  },
+  {
+    id: 'podcaster-creative',
+    name: 'Marcus Chen',
+    type: 'podcaster',
+    typeLabel: 'Podcaster',
+    typeClass: 'type-podcaster',
+    description: 'Host of The Growth Mindset Show — 312 episodes, 1.8M downloads, 245K listeners.',
+    src: '/creator-profile-podcaster.html',
+    infoLabel: 'Creative Concept',
+    stats: [
+      { label: 'Episodes', value: '312' },
+      { label: 'Downloads', value: '1.8M' },
+      { label: 'Rating', value: '4.7' },
+      { label: 'Listeners', value: '245K' }
+    ]
+  }
+];
+
+const ACCURATE_PROFILES = [
+  {
+    id: 'affiliate-accurate',
+    name: 'Sarah Mitchell',
+    type: 'affiliate',
+    typeLabel: 'Affiliate Marketer',
+    typeClass: 'type-affiliate',
+    description: 'Code-accurate: Hero + 2/3 Content + 1/3 Sidebar layout with Follow, Contact, Share, Reviews.',
+    src: '/creator-profile-affiliate-actual.html',
+    infoLabel: 'Code-Accurate',
+    stats: [
+      { label: 'Campaigns', value: '247' },
+      { label: 'Conversion', value: '8.4%' },
+      { label: 'Rating', value: '4.9' },
+      { label: 'Reviews', value: '42' }
+    ]
+  },
+  {
+    id: 'ip-accurate',
+    name: 'Alex Rivera',
+    type: 'ip',
+    typeLabel: 'Internet Personality',
+    typeClass: 'type-ip',
+    description: 'Code-accurate: Hero + 2/3 Content + 1/3 Sidebar layout with Follow, Collaborate, Reviews.',
+    src: '/creator-profile-ip-actual.html',
+    infoLabel: 'Code-Accurate',
+    stats: [
+      { label: 'Reach', value: '2.4M' },
+      { label: 'Engagement', value: '6.8%' },
+      { label: 'Rating', value: '4.8' },
+      { label: 'Collabs', value: '87' }
+    ]
+  },
+  {
+    id: 'podcaster-accurate',
+    name: 'Marcus Chen',
+    type: 'podcaster',
+    typeLabel: 'Podcaster',
+    typeClass: 'type-podcaster',
+    description: 'Code-accurate: Hero + 2/3 Content + 1/3 Sidebar layout with Follow, Guest Booking, Reviews.',
+    src: '/creator-profile-podcaster-actual.html',
+    infoLabel: 'Code-Accurate',
+    stats: [
+      { label: 'Episodes', value: '312' },
+      { label: 'Downloads', value: '1.8M' },
+      { label: 'Rating', value: '4.7' },
+      { label: 'Listeners', value: '245K' }
+    ]
+  }
+];
+
+const ALL_PROFILES = [...CREATIVE_PROFILES, ...ACCURATE_PROFILES];
+
+let currentFilter = 'all';
+let currentLayout = 3;
+
+function buildCard(p) {
+  const card = document.createElement('div');
+  card.className = 'card' + (currentFilter !== 'all' && p.type !== currentFilter ? ' hidden' : '');
+  card.dataset.type = p.type;
+
+  const statsHtml = p.stats.map(s => `<div class="card-stat"><strong>${s.value}</strong> ${s.label}</div>`).join('');
+
+  card.innerHTML = `
+    <div class="card-header">
+      <h3>${p.name}</h3>
+      <span class="profile-type ${p.typeClass}">${p.typeLabel}</span>
+    </div>
+    <div class="card-description">${p.description}</div>
+    <div class="card-stats">${statsHtml}</div>
+    <iframe class="preview-frame ${getHeight()}" src="${p.src}" sandbox="allow-same-origin allow-scripts"></iframe>
+    <div class="card-footer">
+      <div class="info">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        ${p.infoLabel}
+      </div>
+      <div class="actions">
+        <button onclick="openNewTab('${p.src}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          New Tab
+        </button>
+        <button class="primary" onclick="openNewTab('${p.src}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+          Full Screen
+        </button>
+      </div>
+    </div>
+  `;
+  return card;
+}
+
+function renderCards() {
+  const gridCreative = document.getElementById('grid-creative');
+  const gridAccurate = document.getElementById('grid-accurate');
+  gridCreative.innerHTML = '';
+  gridAccurate.innerHTML = '';
+
+  CREATIVE_PROFILES.forEach(p => gridCreative.appendChild(buildCard(p)));
+  ACCURATE_PROFILES.forEach(p => gridAccurate.appendChild(buildCard(p)));
+}
+
+function getHeight() {
+  const map = { 1: 'tall', 2: 'medium', 3: 'short' };
+  return map[currentLayout] || 'medium';
+}
+
+function openNewTab(src) {
+  window.open(src, '_blank');
+}
+
+function setFilter(type) {
+  currentFilter = type;
+  document.querySelectorAll('.controls button').forEach(b => {
+    b.classList.toggle('active', b.dataset.filter === type);
+  });
+  document.querySelectorAll('.card').forEach(c => {
+    c.classList.toggle('hidden', type !== 'all' && c.dataset.type !== type);
+  });
+}
+
+function setLayout(cols) {
+  currentLayout = cols;
+  document.querySelectorAll('.section-grid').forEach(grid => {
+    grid.className = `grid cols-${cols} section-grid`;
+  });
+
+  const heights = { 1: 'tall', 2: 'medium', 3: 'short' };
+  document.querySelectorAll('.preview-frame').forEach(f => {
+    f.className = `preview-frame ${heights[cols]}`;
+  });
+
+  document.querySelectorAll('.layout-controls button').forEach(b => b.classList.remove('active'));
+  document.getElementById('lay' + cols).classList.add('active');
+}
+
+// Initialize
+renderCards();
+</script>
+</body>
+</html>

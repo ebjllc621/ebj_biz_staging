@@ -1,0 +1,76 @@
+/**
+ * Admin Email Template API Routes
+ * GET /api/admin/email-templates/[id] - Get template by ID
+ * PATCH /api/admin/email-templates/[id] - Update template
+ * DELETE /api/admin/email-templates/[id] - Delete template
+ *
+ * @authority PHASE_5.2_BRAIN_PLAN.md - Section 4.5
+ */
+
+import { apiHandler, ApiContext } from '@core/api/apiHandler';
+import { createSuccessResponse } from '@core/api/responseHelpers';
+import { getDatabaseService } from '@core/services/DatabaseService';
+import { BizError } from '@core/errors/BizError';
+
+export const GET = apiHandler(async (context: ApiContext) => {
+  const { user, params } = context;
+
+  if (!user || user.role !== 'admin') {
+    throw BizError.unauthorized('Admin access required');
+  }
+
+  const id = parseInt((params as any).id);
+  const db = getDatabaseService();
+  const results = await db.query('SELECT * FROM email_templates WHERE id = ?', [id]);
+
+  if (results.rows.length === 0) {
+    throw BizError.notFound('Template not found');
+  }
+
+  return createSuccessResponse({ template: results.rows[0] }, 200);
+});
+
+export const PATCH = apiHandler(async (context: ApiContext) => {
+  const { user, params, body } = context;
+
+  if (!user || user.role !== 'admin') {
+    throw BizError.unauthorized('Admin access required');
+  }
+
+  const id = parseInt((params as any).id);
+  const { name, category, subject, body_html, body_text, available_variables, is_active } = body as any;
+
+  const db = getDatabaseService();
+  await db.query(
+    `UPDATE email_templates SET
+      name = ?, category = ?, subject = ?, body_html = ?, body_text = ?,
+      available_variables = ?, is_active = ?, updated_at = NOW()
+     WHERE id = ?`,
+    [
+      name,
+      category,
+      subject,
+      body_html || '',
+      body_text || '',
+      JSON.stringify(available_variables || []),
+      is_active !== false,
+      id
+    ]
+  );
+
+  return createSuccessResponse({ success: true }, 200);
+});
+
+export const DELETE = apiHandler(async (context: ApiContext) => {
+  const { user, params } = context;
+
+  if (!user || user.role !== 'admin') {
+    throw BizError.unauthorized('Admin access required');
+  }
+
+  const id = parseInt((params as any).id);
+  const db = getDatabaseService();
+  await db.query('DELETE FROM email_templates WHERE id = ?', [id]);
+
+  return createSuccessResponse({ success: true }, 200);
+});

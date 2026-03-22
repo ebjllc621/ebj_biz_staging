@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Internet Personality Profile (Code-Accurate) — Bizconekt</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #f9fafb; color: #1a1a2e; line-height: 1.6; }
+
+  /* Biz brand colors */
+  .text-biz-navy { color: #1a1a2e; }
+  .text-biz-orange { color: #ed6437; }
+  .bg-biz-orange { background: #ed6437; }
+
+  /* Back Button Bar */
+  .back-bar { background: #fff; border-bottom: 1px solid #e5e7eb; }
+  .back-bar-inner { max-width: 80rem; margin: 0 auto; padding: 16px; }
+  .back-btn { display: flex; align-items: center; gap: 8px; color: #6b7280; font-size: 14px; background: none; border: none; cursor: pointer; transition: color 0.2s; }
+  .back-btn:hover { color: #1a1a2e; }
+  .back-btn svg { width: 16px; height: 16px; }
+
+  /* Container */
+  .container { max-width: 80rem; margin: 0 auto; padding: 0 16px; }
+
+  /* Hero Card */
+  .hero-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #f3f4f6; overflow: hidden; margin-top: 16px; }
+
+  /* Cover: indigo-600 → pink-600 (IP type) */
+  .cover-banner { width: 100%; height: 192px; background: linear-gradient(to right, #4f46e5, #db2777); position: relative; }
+
+  .hero-body { padding: 0 24px 24px; }
+  .hero-top { display: flex; flex-direction: row; align-items: flex-end; justify-content: space-between; gap: 16px; }
+  .avatar-wrap { margin-top: -64px; position: relative; z-index: 10; }
+  /* Avatar: indigo-500 → pink-600 (IP type) */
+  .avatar { width: 128px; height: 128px; border-radius: 50%; border: 4px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); overflow: hidden; background: linear-gradient(135deg, #6366f1, #db2777); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 40px; font-weight: 700; }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+  .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 4px; }
+  /* Primary button: orange (always — brand accent) */
+  .btn-primary { display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; gap: 6px; padding: 8px 16px; font-size: 14px; background: #ed6437; color: #fff; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; transition: background 0.2s; }
+  .btn-primary:hover { background: #d55a31; }
+  .btn-secondary { display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; gap: 6px; padding: 8px 16px; font-size: 14px; font-weight: 600; border-radius: 8px; border: 2px solid #d1d5db; color: #374151; background: #fff; cursor: pointer; transition: border-color 0.2s; }
+  .btn-secondary:hover { border-color: #1a1a2e; }
+  .btn-recommend { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 14px; font-weight: 600; border-radius: 8px; border: 2px solid #d1d5db; color: #374151; background: #fff; cursor: pointer; }
+
+  .hero-info { margin-top: 16px; }
+  .hero-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .hero-name-row h1 { font-size: 30px; font-weight: 700; color: #1a1a2e; }
+  .verified-icon { width: 24px; height: 24px; color: #22c55e; }
+  .hero-headline { color: #6b7280; margin-top: 4px; font-size: 16px; }
+
+  .hero-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 12px; font-size: 14px; color: #9ca3af; }
+  .hero-meta span { display: flex; align-items: center; gap: 4px; }
+  .hero-meta svg { width: 16px; height: 16px; }
+  .rating-text { color: #d97706; font-weight: 600; }
+
+  /* Total Reach badge: green-50/green-700 */
+  .reach-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600; background: #f0fdf4; color: #15803d; border: 1px solid #dcfce7; }
+  .reach-badge svg { width: 14px; height: 14px; }
+
+  /* Platform badges — type-specific colors */
+  .platform-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .badge-platform { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 500; border: 1px solid; }
+  .badge-platform .verified-check { width: 14px; height: 14px; color: #22c55e; flex-shrink: 0; }
+
+  /* YouTube: red-50/red-700/red-100 */
+  .badge-youtube { background: #fef2f2; color: #b91c1c; border-color: #fee2e2; }
+  /* Instagram: pink-50/pink-700/pink-100 */
+  .badge-instagram { background: #fdf2f8; color: #be185d; border-color: #fce7f3; }
+  /* TikTok: dark gray, white text */
+  .badge-tiktok { background: #111827; color: #fff; border-color: #374151; }
+  /* Twitter/X: blue-50/blue-700/blue-100 */
+  .badge-twitter { background: #eff6ff; color: #1d4ed8; border-color: #dbeafe; }
+
+  /* Content category badges: indigo-50/indigo-700/indigo-100 */
+  .hero-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .badge-indigo { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 500; background: #eef2ff; color: #4338ca; border: 1px solid #e0e7ff; }
+
+  /* Main Grid */
+  .main-grid { display: grid; grid-template-columns: 1fr; gap: 24px; margin-top: 24px; padding-bottom: 60px; }
+  @media (min-width: 1024px) { .main-grid { grid-template-columns: 2fr 1fr; } }
+
+  /* Content Cards */
+  .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #f3f4f6; padding: 24px; margin-bottom: 24px; }
+  .card h2 { font-size: 18px; font-weight: 600; color: #1a1a2e; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .card h2 svg { width: 20px; height: 20px; color: #ed6437; flex-shrink: 0; }
+  .card h2 .count { margin-left: 4px; font-size: 14px; font-weight: 400; color: #9ca3af; }
+
+  /* Bio */
+  .bio-text { color: #374151; line-height: 1.7; white-space: pre-line; max-height: 120px; overflow: hidden; position: relative; }
+  .bio-text.expanded { max-height: none; }
+  .bio-fade { position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(to top, #fff, transparent); }
+  .show-more-btn { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; color: #ed6437; font-size: 14px; font-weight: 600; background: none; border: none; cursor: pointer; }
+
+  /* Collab grid */
+  .collab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 768px) { .collab-grid { grid-template-columns: 1fr; } }
+  .collab-item { border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; transition: border-color 0.2s; }
+  .collab-item:hover { border-color: #d1d5db; }
+  .collab-brand { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .brand-initial { width: 32px; height: 32px; border-radius: 50%; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; color: #6b7280; flex-shrink: 0; }
+  .collab-brand span { font-size: 14px; font-weight: 500; color: #1f2937; }
+  /* Collab type badge: indigo */
+  .collab-type-badge { display: inline-block; background: #eef2ff; color: #4338ca; font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; }
+  .collab-desc { font-size: 12px; color: #6b7280; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 8px; }
+  .collab-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding-top: 8px; border-top: 1px solid #f3f4f6; }
+  .collab-footer .meta { font-size: 12px; color: #9ca3af; }
+  .collab-footer .link { font-size: 12px; color: #ed6437; text-decoration: none; font-weight: 600; }
+  .collab-footer .link:hover { text-decoration: underline; }
+
+  /* Reviews */
+  .reviews-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .write-review-btn { padding: 6px 16px; font-size: 14px; font-weight: 600; color: #ed6437; border: 2px solid #ed6437; border-radius: 8px; background: #fff; cursor: pointer; transition: background 0.2s; }
+  .write-review-btn:hover { background: #fef2ee; }
+
+  .rating-summary { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #f3f4f6; }
+  .rating-big { font-size: 30px; font-weight: 700; color: #111827; }
+  .stars-row { display: flex; gap: 2px; }
+
+  .review-item { padding-bottom: 16px; border-bottom: 1px solid #f3f4f6; margin-bottom: 16px; }
+  .review-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .review-row { display: flex; align-items: flex-start; gap: 12px; }
+  .review-avatar { width: 40px; height: 40px; border-radius: 50%; background: #1a1a2e; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; flex-shrink: 0; }
+  .review-body { flex: 1; min-width: 0; }
+  .review-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+  .review-name { font-size: 14px; font-weight: 500; color: #111827; }
+  .review-type-badge { font-size: 12px; padding: 2px 8px; background: #f3f4f6; color: #6b7280; border-radius: 4px; }
+  .review-text { font-size: 14px; color: #374151; margin-top: 8px; }
+  .review-date { font-size: 12px; color: #d1d5db; margin-top: 4px; }
+
+  .pagination { display: flex; justify-content: center; gap: 8px; margin-top: 24px; }
+  .pagination button { padding: 8px 16px; background: #f3f4f6; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; color: #374151; }
+  .pagination button:hover { background: #e5e7eb; }
+  .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .pagination .page-info { padding: 8px 16px; font-size: 14px; color: #6b7280; }
+
+  /* Sidebar */
+  .sidebar { display: flex; flex-direction: column; gap: 16px; }
+  .sidebar-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #f3f4f6; padding: 24px; }
+  .sidebar-card h3 { font-size: 16px; font-weight: 600; color: #1a1a2e; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .sidebar-card h3 svg { width: 20px; height: 20px; color: #ed6437; }
+
+  .stat-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .stat-row:last-child { margin-bottom: 0; }
+  .stat-row svg { width: 20px; height: 20px; color: #9ca3af; flex-shrink: 0; }
+  .stat-row .star-icon { color: #fbbf24; }
+  .stat-label { font-size: 12px; color: #9ca3af; }
+  .stat-value { font-size: 14px; font-weight: 600; color: #111827; }
+  .stat-value .sub { color: #9ca3af; font-weight: 400; margin-left: 4px; }
+  /* % symbol icon for engagement rate */
+  .pct-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px; font-weight: 700; color: #9ca3af; }
+
+  /* Subscribe Card — mirrors ContentSubscribeCard exactly */
+  .subscribe-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #f3f4f6; padding: 20px; }
+  .subscribe-heading { font-size: 12px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+  .subscribe-desc { font-size: 14px; color: #6b7280; margin-bottom: 16px; }
+  .follow-btn { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 16px; background: #ed6437; color: #fff; border: none; border-radius: 6px; font-size: 16px; font-weight: 500; cursor: pointer; justify-content: center; transition: background 0.2s; }
+  .follow-btn:hover { background: #d55a31; }
+  .follow-btn svg { width: 16px; height: 16px; }
+  .follower-count { text-align: center; font-size: 12px; color: #d1d5db; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 4px; }
+  .follower-count svg { width: 12px; height: 12px; }
+
+  /* Rate card */
+  .rate-row { margin-bottom: 12px; }
+  .rate-row:last-child { margin-bottom: 0; }
+  .rate-label { font-size: 12px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
+  .rate-value { font-size: 14px; font-weight: 600; color: #111827; }
+
+  /* Collaboration types — "Open To" */
+  .collab-type-list { display: flex; flex-direction: column; gap: 8px; }
+  .collab-type-row { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #374151; }
+  .collab-type-row svg { width: 16px; height: 16px; color: #22c55e; flex-shrink: 0; }
+
+  /* CTA */
+  .cta-btn { width: 100%; padding: 12px; background: #ed6437; color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+  .cta-btn:hover { background: #d55a31; }
+  .media-kit-btn { width: 100%; display: block; text-align: center; margin-top: 8px; padding: 8px 12px; border: 1px solid #d1d5db; color: #374151; background: #fff; border-radius: 8px; font-size: 14px; font-weight: 500; text-decoration: none; cursor: pointer; transition: background 0.2s; }
+  .media-kit-btn:hover { background: #f9fafb; }
+  .management-contact { text-align: center; font-size: 12px; color: #9ca3af; margin-top: 8px; }
+  .cta-count { text-align: center; font-size: 12px; color: #9ca3af; margin-top: 8px; }
+
+  /* Social */
+  .social-website { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #6b7280; text-decoration: none; margin-bottom: 12px; }
+  .social-website:hover { color: #1a1a2e; }
+  .social-website svg { width: 16px; height: 16px; color: #9ca3af; }
+  .social-icons { display: flex; flex-wrap: wrap; gap: 8px; }
+  .social-icon { width: 36px; height: 36px; border-radius: 8px; border: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: all 0.2s; cursor: pointer; }
+  .social-icon:hover { border-color: #d1d5db; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .social-icon svg { width: 16px; height: 16px; }
+  .social-icon.yt svg { color: #9ca3af; } .social-icon.yt:hover svg { color: #FF0000; }
+  .social-icon.ig svg { color: #9ca3af; } .social-icon.ig:hover svg { color: #E4405F; }
+  .social-icon.tt svg { color: #9ca3af; } .social-icon.tt:hover svg { color: #000; }
+  .social-icon.tw svg { color: #9ca3af; } .social-icon.tw:hover svg { color: #000; }
+  .social-icon.li svg { color: #9ca3af; } .social-icon.li:hover svg { color: #0A66C2; }
+
+  @media (max-width: 1023px) {
+    .hero-top { flex-direction: column; align-items: flex-start; }
+    .avatar { width: 96px; height: 96px; font-size: 32px; }
+    .avatar-wrap { margin-top: -48px; }
+    .hero-name-row h1 { font-size: 24px; }
+    .cover-banner { height: 128px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Back Button Bar -->
+<div class="back-bar">
+  <div class="back-bar-inner">
+    <button class="back-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Back
+    </button>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Hero Card -->
+  <div class="hero-card">
+    <!-- Cover: indigo-600 → pink-600 -->
+    <div class="cover-banner"></div>
+    <div class="hero-body">
+      <div class="hero-top">
+        <div class="avatar-wrap">
+          <!-- Avatar: indigo-500 → pink-600 gradient fallback -->
+          <div class="avatar">
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face" alt="Alex Rivera">
+          </div>
+        </div>
+        <div class="hero-actions">
+          <!-- Primary: Collaborate + Handshake icon (IP-specific) -->
+          <button class="btn-primary">
+            <!-- Handshake icon (lucide) -->
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 0C1.46 6.7 1.33 10.28 4 13l8 8 8-8c2.67-2.72 2.54-6.3.42-8.42z"/><path d="M12 5.36 8.87 8.5a2.13 2.13 0 0 0 0 3 2.13 2.13 0 0 0 3 0l2.26-2.21a2.13 2.13 0 0 1 3 0 2.13 2.13 0 0 1 0 3l-2.38 2.38"/></svg>
+            Collaborate
+          </button>
+          <button class="btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Share
+          </button>
+          <button class="btn-recommend">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+            Recommend
+          </button>
+        </div>
+      </div>
+
+      <div class="hero-info">
+        <!-- Name + verified check -->
+        <div class="hero-name-row">
+          <h1>Alex Rivera</h1>
+          <svg class="verified-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <p class="hero-headline">Tech Creator &amp; Digital Lifestyle Influencer</p>
+
+        <!-- Meta: location, creating since, total_reach badge, rating -->
+        <div class="hero-meta">
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Los Angeles, CA
+          </span>
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Creating since 2018
+          </span>
+          <!-- total_reach as green badge near name row area -->
+          <span class="reach-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            2.4M Total Reach
+          </span>
+          <span class="rating-text">4.8 (38 reviews)</span>
+        </div>
+
+        <!-- Platform badges: YouTube, Instagram, TikTok, Twitter/X — type-specific colors with verified checks -->
+        <div class="platform-badges">
+          <!-- YouTube: red-50/red-700 -->
+          <span class="badge-platform badge-youtube">
+            YouTube
+            <svg class="verified-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </span>
+          <!-- Instagram: pink-50/pink-700 -->
+          <span class="badge-platform badge-instagram">
+            Instagram
+            <svg class="verified-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </span>
+          <!-- TikTok: dark gray bg, white text -->
+          <span class="badge-platform badge-tiktok">
+            TikTok
+            <svg class="verified-check" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </span>
+          <!-- Twitter/X: blue-50/blue-700 -->
+          <span class="badge-platform badge-twitter">
+            Twitter/X
+            <!-- not connected — no check mark -->
+          </span>
+        </div>
+
+        <!-- Content category badges: indigo-50/indigo-700 -->
+        <div class="hero-badges">
+          <span class="badge-indigo">Tech Reviews</span>
+          <span class="badge-indigo">Productivity</span>
+          <span class="badge-indigo">Digital Lifestyle</span>
+          <span class="badge-indigo">Gadgets</span>
+          <span class="badge-indigo">Software</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="main-grid">
+    <!-- Content Column -->
+    <div>
+      <!-- 1. About / Bio — FileText icon, expandable -->
+      <div class="card">
+        <h2>
+          <!-- FileText icon (lucide) -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          About
+        </h2>
+        <div style="position:relative;">
+          <div class="bio-text" id="bio">
+I've been creating tech content since 2018, building a community of 2.4M+ people across YouTube, Instagram, and TikTok who trust my honest take on the latest gadgets, apps, and digital lifestyle tools.
+
+My content blends in-depth tech reviews with practical productivity tips and behind-the-scenes looks at how I run my creator business. I believe great tech should simplify life — and I'm here to help my audience cut through the noise.
+
+I've collaborated with global brands including Sony, Notion, Logitech, and Adobe, producing authentic integrations that resonate with my highly engaged tech-forward audience. Whether it's a sponsored YouTube deep-dive or an Instagram campaign, I approach every partnership with editorial integrity and measurable impact.
+          </div>
+          <div class="bio-fade" id="bioFade"></div>
+        </div>
+        <button class="show-more-btn" onclick="document.getElementById('bio').classList.toggle('expanded');this.textContent=this.textContent==='Show More'?'Show Less':'Show More';document.getElementById('bioFade').style.display=document.getElementById('bio').classList.contains('expanded')?'none':'block';">Show More</button>
+      </div>
+
+      <!-- 2. Content Categories — Tag icon, indigo-50/indigo-700 badges -->
+      <div class="card">
+        <h2>
+          <!-- Tag icon (lucide) -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          Content Categories
+        </h2>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <span class="badge-indigo">Tech Reviews</span>
+          <span class="badge-indigo">Productivity</span>
+          <span class="badge-indigo">Digital Lifestyle</span>
+          <span class="badge-indigo">Gadgets</span>
+          <span class="badge-indigo">Software &amp; Apps</span>
+          <span class="badge-indigo">Creator Economy</span>
+          <span class="badge-indigo">AI Tools</span>
+        </div>
+      </div>
+
+      <!-- 3. Brand Collaborations — Handshake icon, 2-col grid, indigo collab_type badge -->
+      <div class="card">
+        <h2>
+          <!-- Handshake icon (lucide) -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 0C1.46 6.7 1.33 10.28 4 13l8 8 8-8c2.67-2.72 2.54-6.3.42-8.42z"/><path d="M12 5.36 8.87 8.5a2.13 2.13 0 0 0 0 3 2.13 2.13 0 0 0 3 0l2.26-2.21a2.13 2.13 0 0 1 3 0 2.13 2.13 0 0 1 0 3l-2.38 2.38"/></svg>
+          Brand Collaborations
+          <span class="count">(4)</span>
+        </h2>
+        <div class="collab-grid">
+
+          <div class="collab-item">
+            <div class="collab-brand">
+              <div class="brand-initial">S</div>
+              <span>Sony Electronics</span>
+            </div>
+            <span class="collab-type-badge">Sponsored Content</span>
+            <p class="collab-desc">Full YouTube integration and Instagram campaign for the WH-1000XM5 headphones launch — unboxing, long-term review, and lifestyle integration reels.</p>
+            <div class="collab-footer">
+              <span class="meta">Feb 2026</span>
+              <a href="#" class="link">View Content</a>
+            </div>
+          </div>
+
+          <div class="collab-item">
+            <div class="collab-brand">
+              <div class="brand-initial">N</div>
+              <span>Notion</span>
+            </div>
+            <span class="collab-type-badge">Brand Ambassador</span>
+            <p class="collab-desc">Ongoing brand ambassador partnership — monthly productivity workflow videos showcasing Notion's AI features with verified affiliate links for the creator audience.</p>
+            <div class="collab-footer">
+              <span class="meta">Jan 2026</span>
+              <a href="#" class="link">View Content</a>
+            </div>
+          </div>
+
+          <div class="collab-item">
+            <div class="collab-brand">
+              <div class="brand-initial">L</div>
+              <span>Logitech</span>
+            </div>
+            <span class="collab-type-badge">Product Review</span>
+            <p class="collab-desc">In-depth review series for the MX Master 3S and MX Keys keyboard targeting creative professionals and software developers in the audience.</p>
+            <div class="collab-footer">
+              <span class="meta">Nov 2025</span>
+              <a href="#" class="link">View Content</a>
+            </div>
+          </div>
+
+          <div class="collab-item">
+            <div class="collab-brand">
+              <div class="brand-initial">A</div>
+              <span>Adobe</span>
+            </div>
+            <span class="collab-type-badge">Sponsored Content</span>
+            <p class="collab-desc">Creative Cloud campaign targeting aspiring content creators — tutorial-style integration highlighting Premiere Pro and After Effects for YouTube production workflows.</p>
+            <div class="collab-footer">
+              <span class="meta">Sep 2025</span>
+              <a href="#" class="link">View Content</a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 4. Reviews — Star icon, Write a Review, pagination -->
+      <div class="card">
+        <div class="reviews-header">
+          <h2 style="margin-bottom:0;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Reviews <span class="count">(38)</span>
+          </h2>
+          <button class="write-review-btn">Write a Review</button>
+        </div>
+
+        <!-- Rating summary -->
+        <div class="rating-summary">
+          <span class="rating-big">4.8</span>
+          <div>
+            <div class="stars-row">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+            </div>
+            <p style="font-size:14px;color:#9ca3af;margin-top:4px;">38 reviews</p>
+          </div>
+        </div>
+
+        <div class="review-item">
+          <div class="review-row">
+            <div class="review-avatar">MK</div>
+            <div class="review-body">
+              <div class="review-name-row">
+                <span class="review-name">Maya Kim</span>
+                <span class="review-type-badge">Sponsored Content</span>
+              </div>
+              <div class="stars-row">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+              </div>
+              <p class="review-text">Alex delivered beyond expectations. His audience engagement on the Sony campaign was extraordinary — comments were genuine, questions were detailed, and the click-through rates crushed our benchmarks. We renewed immediately for a second campaign.</p>
+              <p class="review-date">03/01/2026</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="review-item">
+          <div class="review-row">
+            <div class="review-avatar">DP</div>
+            <div class="review-body">
+              <div class="review-name-row">
+                <span class="review-name">Daniel Park</span>
+                <span class="review-type-badge">Brand Ambassador</span>
+              </div>
+              <div class="stars-row">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+              </div>
+              <p class="review-text">The Notion ambassador campaign has been running for 6 months and the consistency is remarkable. Alex truly uses the product, understands our target user, and creates content that drives real signups. The highest-quality creator partnership we've had.</p>
+              <p class="review-date">02/10/2026</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="review-item">
+          <div class="review-row">
+            <div class="review-avatar">SR</div>
+            <div class="review-body">
+              <div class="review-name-row">
+                <span class="review-name">Sofia Reyes</span>
+                <span class="review-type-badge">Product Review</span>
+              </div>
+              <div class="stars-row">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#e5e7eb" stroke="#e5e7eb"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+              </div>
+              <p class="review-text">Solid collaboration. Alex's review of our MX Master line was detailed and fair. His audience clearly trusts him which shows in the comments. We'd have liked faster turnaround on revisions, but the final output was excellent.</p>
+              <p class="review-date">01/14/2026</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pagination">
+          <button disabled>Previous</button>
+          <span class="page-info">Page 1 of 8</span>
+          <button>Next</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+
+      <!-- 1. Stats card: Profile Views, Total Reach, Collaborations, Avg Engagement Rate, Rating -->
+      <div class="sidebar-card">
+        <h3 style="display:block;margin-bottom:16px;">Stats</h3>
+        <!-- Profile Views — Eye icon -->
+        <div class="stat-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <div><div class="stat-label">Profile Views</div><div class="stat-value">18,342</div></div>
+        </div>
+        <!-- Total Reach — Users icon -->
+        <div class="stat-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <div><div class="stat-label">Total Reach</div><div class="stat-value">2.4M</div></div>
+        </div>
+        <!-- Collaborations — Handshake icon -->
+        <div class="stat-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 0C1.46 6.7 1.33 10.28 4 13l8 8 8-8c2.67-2.72 2.54-6.3.42-8.42z"/><path d="M12 5.36 8.87 8.5a2.13 2.13 0 0 0 0 3 2.13 2.13 0 0 0 3 0l2.26-2.21a2.13 2.13 0 0 1 3 0 2.13 2.13 0 0 1 0 3l-2.38 2.38"/></svg>
+          <div><div class="stat-label">Collaborations</div><div class="stat-value">64</div></div>
+        </div>
+        <!-- Avg Engagement Rate — % symbol -->
+        <div class="stat-row">
+          <div class="pct-icon">%</div>
+          <div><div class="stat-label">Avg Engagement Rate</div><div class="stat-value">4.7%</div></div>
+        </div>
+        <!-- Rating — Star (amber) -->
+        <div class="stat-row">
+          <svg class="star-icon" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <div><div class="stat-label">Rating</div><div class="stat-value">4.8 / 5.0 <span class="sub">(38)</span></div></div>
+        </div>
+      </div>
+
+      <!-- 2. ContentSubscribeCard: "Follow Creator" heading, orange follow btn, follower count -->
+      <div class="subscribe-card">
+        <div class="subscribe-heading">Follow Creator</div>
+        <p class="subscribe-desc">Follow Alex Rivera to stay updated on their latest content.</p>
+        <button class="follow-btn">
+          <!-- Bell icon (lucide) -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          Follow Alex Rivera
+        </button>
+        <p class="follower-count">
+          <!-- Users icon (lucide inline) -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          842 followers
+        </p>
+      </div>
+
+      <!-- 3. Rate Card — DollarSign icon, JSON key-value pairs -->
+      <div class="sidebar-card">
+        <h3>
+          <!-- DollarSign icon (lucide) -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Rate Card
+        </h3>
+        <div class="rate-row">
+          <div class="rate-label">Instagram Post</div>
+          <div class="rate-value">$1,200</div>
+        </div>
+        <div class="rate-row">
+          <div class="rate-label">Instagram Reel</div>
+          <div class="rate-value">$2,000</div>
+        </div>
+        <div class="rate-row">
+          <div class="rate-label">YouTube Integration</div>
+          <div class="rate-value">$3,500</div>
+        </div>
+        <div class="rate-row">
+          <div class="rate-label">YouTube Dedicated Video</div>
+          <div class="rate-value">$6,000</div>
+        </div>
+        <div class="rate-row">
+          <div class="rate-label">TikTok Video</div>
+          <div class="rate-value">$900</div>
+        </div>
+      </div>
+
+      <!-- 4. Collaboration Types ("Open To") — CheckCircle icon heading, green checks per row -->
+      <div class="sidebar-card">
+        <h3>
+          <!-- CheckCircle icon (lucide) — orange accent -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          Open To
+        </h3>
+        <div class="collab-type-list">
+          <div class="collab-type-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Sponsored Posts
+          </div>
+          <div class="collab-type-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Brand Ambassador
+          </div>
+          <div class="collab-type-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Product Review
+          </div>
+          <div class="collab-type-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Event Hosting
+          </div>
+          <div class="collab-type-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Podcast Guest
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Contact CTA: "Request Collaboration" + "Download Media Kit" + management + contact count -->
+      <div class="sidebar-card">
+        <button class="cta-btn">Request Collaboration</button>
+        <a href="#" class="media-kit-btn">Download Media Kit</a>
+        <p class="management-contact">Management: manager@alexrivera.co</p>
+        <p class="cta-count">203 brands have reached out</p>
+      </div>
+
+      <!-- 6. Social Links — Share2/Connect heading, website, platform icons -->
+      <div class="sidebar-card">
+        <h3>
+          <!-- Share2 icon (lucide) -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Connect
+        </h3>
+        <!-- Website — Globe icon -->
+        <a href="#" class="social-website">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          alexrivera.co
+        </a>
+        <!-- Platform icons: YouTube, Instagram, TikTok, Twitter/X, LinkedIn -->
+        <div class="social-icons">
+          <!-- YouTube -->
+          <a href="#" class="social-icon yt" title="YouTube">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+          </a>
+          <!-- Instagram -->
+          <a href="#" class="social-icon ig" title="Instagram">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+          </a>
+          <!-- TikTok -->
+          <a href="#" class="social-icon tt" title="TikTok">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z"/></svg>
+          </a>
+          <!-- Twitter/X -->
+          <a href="#" class="social-icon tw" title="Twitter/X">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+          <!-- LinkedIn -->
+          <a href="#" class="social-icon li" title="LinkedIn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,101 @@
+/**
+ * Dashboard Theme CSS Variables
+ *
+ * @phase Phase 3 - Color Theming System
+ * @authority docs/pages/layouts/listings/details/userdash/phases/PHASE_3_BRAIN_PLAN.md
+ * @description Dynamic CSS variables for Personal and Listing Manager dashboard themes
+ *
+ * GOVERNANCE:
+ * - Personal theme: Blue (#2563eb family)
+ * - Listing Manager theme: Orange (#ed6437 Bizconekt orange)
+ * - All colors must meet WCAG 2.1 AA contrast requirements
+ */
+
+/* ============================================================================
+ * PERSONAL THEME (Default)
+ * Applied when no theme class is present
+ * ============================================================================ */
+:root {
+  /* ----------------- Primary Colors ----------------- */
+  --dashboard-primary: #1e40af;           /* blue-800 - matches section headers */
+  --dashboard-primary-light: #2563eb;     /* blue-600 */
+  --dashboard-primary-dark: #1e3a8a;      /* blue-900 */
+  --dashboard-primary-contrast: #ffffff;  /* white */
+
+  /* ----------------- Background States ----------------- */
+  --dashboard-bg-hover: #dbeafe;          /* blue-100 - visible on white */
+  --dashboard-bg-active: #1e40af;         /* blue-800 - matches section headers */
+  --dashboard-bg-active-subtle: rgba(30, 64, 175, 0.1);  /* blue-800/10 */
+  --dashboard-bg-muted: #f9fafb;          /* gray-50 */
+
+  /* ----------------- Text Colors ----------------- */
+  --dashboard-text-primary: #1e40af;      /* blue-800 - section headers */
+  --dashboard-text-on-primary: #ffffff;   /* white - text on primary bg */
+  --dashboard-text-muted: #374151;        /* gray-700 - default text */
+  --dashboard-text-accessible: #1e40af;   /* blue-800 - body text (WCAG AA) */
+
+  /* ----------------- Border Colors ----------------- */
+  --dashboard-border-primary: #1e40af;    /* blue-800 */
+  --dashboard-border-light: #bfdbfe;      /* blue-200 */
+  --dashboard-border-nested: #bfdbfe;     /* blue-200 - nested menu indicator */
+
+  /* ----------------- Badge Colors ----------------- */
+  --dashboard-badge-bg: #1e40af;          /* blue-800 */
+  --dashboard-badge-text: #ffffff;        /* white */
+
+  /* ----------------- Interactive States ----------------- */
+  --dashboard-focus-ring: rgba(30, 64, 175, 0.5);  /* blue-800/50 */
+  --dashboard-spinner: #1e40af;           /* blue-800 */
+}
+
+/* ============================================================================
+ * LISTING MANAGER THEME
+ * Applied via .theme-listing-manager class on dashboard container
+ * ============================================================================ */
+.theme-listing-manager {
+  /* ----------------- Primary Colors ----------------- */
+  --dashboard-primary: #ed6437;           /* Bizconekt orange */
+  --dashboard-primary-light: #f97316;     /* orange-500 */
+  --dashboard-primary-dark: #d54a1f;      /* Bizconekt primaryDark */
+  --dashboard-primary-contrast: #ffffff;  /* white */
+
+  /* ----------------- Background States ----------------- */
+  --dashboard-bg-hover: #fff7ed;          /* orange-50 */
+  --dashboard-bg-active: #ed6437;         /* Bizconekt orange */
+  --dashboard-bg-active-subtle: rgba(237, 100, 55, 0.1);  /* orange/10 */
+  --dashboard-bg-muted: #fffbf5;          /* warm white */
+
+  /* ----------------- Text Colors ----------------- */
+  --dashboard-text-primary: #ed6437;      /* Bizconekt orange - section headers */
+  --dashboard-text-on-primary: #ffffff;   /* white - text on primary bg */
+  --dashboard-text-muted: #374151;        /* gray-700 - default text */
+  --dashboard-text-accessible: #C65D00;   /* Accessible orange (WCAG AA) */
+
+  /* ----------------- Border Colors ----------------- */
+  --dashboard-border-primary: #ed6437;    /* Bizconekt orange */
+  --dashboard-border-light: #fed7aa;      /* orange-200 */
+  --dashboard-border-nested: #fed7aa;     /* orange-200 - nested menu indicator */
+
+  /* ----------------- Badge Colors ----------------- */
+  --dashboard-badge-bg: #ed6437;          /* Bizconekt orange */
+  --dashboard-badge-text: #ffffff;        /* white */
+
+  /* ----------------- Interactive States ----------------- */
+  --dashboard-focus-ring: rgba(237, 100, 55, 0.5);  /* orange/50 */
+  --dashboard-spinner: #ed6437;           /* Bizconekt orange */
+}
+
+/* ============================================================================
+ * SCROLLBAR UTILITIES
+ * Phase 4 Enhancement - Hidden scrollbars with preserved scroll functionality
+ * ============================================================================ */
+
+/* Hide scrollbars but keep scroll functionality */
+.scrollbar-hidden {
+  scrollbar-width: none;           /* Firefox */
+  -ms-overflow-style: none;        /* IE/Edge */
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;                   /* Chrome, Safari, Opera */
+}

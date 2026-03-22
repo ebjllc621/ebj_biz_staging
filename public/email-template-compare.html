@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Email Template Comparison</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f0f1a; color: #e0e0e0; padding: 20px; }
+  h1 { text-align: center; margin-bottom: 8px; color: #ed6437; font-size: 28px; }
+  .subtitle { text-align: center; color: #888; margin-bottom: 20px; font-size: 14px; }
+
+  .controls { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 24px; }
+  .controls button { padding: 8px 16px; border: 1px solid #333; background: #1a1a2e; color: #ccc; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+  .controls button:hover { border-color: #ed6437; color: #ed6437; }
+  .controls button.active { background: #ed6437; color: #fff; border-color: #ed6437; }
+
+  .layout-controls { display: flex; gap: 8px; justify-content: center; margin-bottom: 24px; }
+  .layout-controls button { padding: 6px 14px; border: 1px solid #333; background: #1a1a2e; color: #ccc; border-radius: 6px; cursor: pointer; font-size: 12px; }
+  .layout-controls button.active { background: #333; color: #fff; border-color: #555; }
+
+  .grid { display: grid; gap: 20px; }
+  .grid.cols-1 { grid-template-columns: 1fr; max-width: 700px; margin: 0 auto; }
+  .grid.cols-2 { grid-template-columns: 1fr 1fr; }
+  .grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  .card { background: #1a1a2e; border: 1px solid #2a2a3e; border-radius: 10px; overflow: hidden; transition: border-color 0.2s; }
+  .card:hover { border-color: #ed6437; }
+  .card.hidden { display: none; }
+
+  .card-header { padding: 12px 16px; background: #12121f; border-bottom: 1px solid #2a2a3e; display: flex; justify-content: space-between; align-items: center; }
+  .card-header h3 { font-size: 14px; color: #ed6437; }
+  .card-header .badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: #2a2a3e; color: #aaa; }
+  .card-header .badge.recommended { background: #1a3a1a; color: #4ade80; }
+
+  .card-subject { padding: 8px 16px; font-size: 12px; color: #888; border-bottom: 1px solid #1f1f30; }
+  .card-subject span { color: #ccc; }
+
+  .preview-frame { width: 100%; border: none; background: #fff; }
+  .preview-frame.tall { height: 600px; }
+  .preview-frame.medium { height: 450px; }
+  .preview-frame.short { height: 350px; }
+
+  .card-footer { padding: 8px 16px; background: #12121f; border-top: 1px solid #2a2a3e; display: flex; justify-content: space-between; align-items: center; }
+  .card-footer .vars { font-size: 11px; color: #666; }
+  .card-footer button { padding: 4px 10px; font-size: 11px; border: 1px solid #333; background: transparent; color: #aaa; border-radius: 4px; cursor: pointer; }
+  .card-footer button:hover { border-color: #ed6437; color: #ed6437; }
+
+  .loading { text-align: center; padding: 60px; color: #888; font-size: 18px; }
+  .error { text-align: center; padding: 60px; color: #ef4444; font-size: 16px; }
+
+  @media (max-width: 1200px) { .grid.cols-3 { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 800px) { .grid.cols-2, .grid.cols-3 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<h1>Email Template Comparison</h1>
+<p class="subtitle">Side-by-side visual comparison of all email templates</p>
+
+<div class="controls" id="filters"></div>
+<div class="layout-controls">
+  <button onclick="setLayout(1)" id="lay1">Single</button>
+  <button onclick="setLayout(2)" id="lay2" class="active">Side by Side</button>
+  <button onclick="setLayout(3)" id="lay3">Triple</button>
+</div>
+
+<div class="grid cols-2" id="grid">
+  <div class="loading">Loading templates...</div>
+</div>
+
+<script>
+const CATEGORIES = {
+  'all': 'All Templates',
+  'auth': 'Authentication',
+  'claim': 'Claims',
+  'listing': 'Listings',
+  'notification': 'Notifications',
+  'newsletter': 'Newsletter',
+  'admin': 'Admin',
+  'system': 'System',
+  'recommended': 'Recommended'
+};
+
+const CATEGORY_MAP = {
+  'email_verification': 'auth', 'password_reset_v2': 'auth',
+  'claim_initiated': 'claim', 'claim_verification_pending': 'claim',
+  'claim_under_review': 'claim', 'claim_approved': 'claim', 'claim_rejected': 'claim',
+  'listing_submitted': 'listing', 'listing_approved': 'listing', 'listing_rejected': 'listing',
+  'immediate_notification': 'notification', 'digest_notification': 'notification',
+  'newsletter': 'newsletter',
+  'admin_claim_alert': 'admin', 'admin_listing_alert': 'admin',
+  'health_alert': 'system', 'test_basic': 'system', 'test_notification': 'system',
+  'welcome_v2': 'recommended', 'account_deactivation_warning': 'recommended',
+  'listing_expiry_reminder': 'recommended', 'payment_receipt': 'recommended',
+  'contact_form_notification': 'recommended'
+};
+
+let currentFilter = 'all';
+let templates = [];
+
+function substituteVars(html, vars) {
+  let result = html;
+  const defaults = {
+    user_name: 'Jane Smith', first_name: 'Jane', business_name: 'Acme Coffee Shop',
+    verification_url: '#', verification_link: '#', reset_url: '#', reset_link: '#',
+    claim_url: '#', login_url: '#', listing_url: '#', dashboard_url: '#',
+    action_url: '#', manage_url: '#', settings_url: '#', review_url: '#',
+    unsubscribe_url: '#', contact_url: '#', website_url: '#',
+    claim_id: 'CLM-2026-0042', listing_id: '1234',
+    status: 'Under Review', rejection_reason: 'Insufficient documentation provided.',
+    tier_name: 'Plus', tier_features: 'Enhanced analytics, Priority support, Custom branding',
+    notification_title: 'New Review Received', notification_body: 'Someone left a 5-star review on your listing.',
+    notification_count: '3', notification_summary: '<li>New review on Acme Coffee</li><li>Listing view milestone reached</li><li>Weekly analytics ready</li>',
+    period: 'Today', digest_date: 'March 15, 2026',
+    subject_line: 'Monthly Newsletter', preview_text: 'Check out what is new...',
+    hero_content: '<h2 style="margin:0;color:#1a1a2e;">Featured: Spring Collection</h2><p style="margin:8px 0 0;color:#555;">Discover new listings this season.</p>',
+    featured_image_url: 'https://placehold.co/560x200/ed6437/white?text=Featured+Image',
+    sections_html: '<tr><td style="padding:16px 0;border-bottom:1px solid #eee;"><h3 style="margin:0 0 8px;color:#1a1a2e;">Community Spotlight</h3><p style="margin:0;color:#555;">Meet the businesses making a difference in your area.</p></td></tr>',
+    admin_name: 'Admin', claimer_name: 'John Doe', claimer_email: 'john@example.com',
+    claim_date: 'March 15, 2026', evidence_summary: '3 documents uploaded, phone verified',
+    review_url_admin: '#', submitter_name: 'Jane Smith', submitter_email: 'jane@example.com',
+    category: 'Restaurant', submission_date: 'March 15, 2026',
+    alert_level: 'WARNING', service_name: 'Database Connection Pool',
+    alert_message: 'Connection pool utilization at 85% capacity.',
+    alert_timestamp: '2026-03-15T10:30:00Z', details_url: '#',
+    metric_rows: '<tr><td style="padding:8px;border-bottom:1px solid #eee;color:#555;">CPU Usage</td><td style="padding:8px;border-bottom:1px solid #eee;font-weight:600;color:#1a1a2e;">72%</td></tr><tr><td style="padding:8px;border-bottom:1px solid #eee;color:#555;">Memory</td><td style="padding:8px;border-bottom:1px solid #eee;font-weight:600;color:#1a1a2e;">4.2 GB / 8 GB</td></tr>',
+    test_timestamp: new Date().toISOString(),
+    current_year: '2026', site_name: 'Bizconekt', site_url: '#',
+    quick_links: '<li><a href="#" style="color:#ed6437;">Complete your profile</a></li><li><a href="#" style="color:#ed6437;">Browse listings</a></li><li><a href="#" style="color:#ed6437;">Explore categories</a></li>',
+    warning_level: 'WARNING', account_email: 'jane@example.com',
+    reason: 'Inactivity for 12 months', deactivation_date: 'April 15, 2026',
+    reactivate_url: '#', days_remaining: '30',
+    listing_name: 'Acme Coffee Shop', expiry_date: 'April 1, 2026', renew_url: '#',
+    renewal_options: '<li><strong>Essentials</strong> - Free renewal</li><li><strong>Plus</strong> - $29/month</li><li><strong>Premium</strong> - $79/month</li>',
+    order_id: 'ORD-2026-0789', payment_date: 'March 15, 2026',
+    payment_method: 'Visa ending in 4242', amount: '$29.00',
+    line_items: '<tr><td style="padding:8px 0;border-bottom:1px solid #eee;color:#555;">Plus Tier - Monthly</td><td style="padding:8px 0;border-bottom:1px solid #eee;text-align:right;color:#1a1a2e;font-weight:600;">$29.00</td></tr>',
+    tax_amount: '$2.61', total_amount: '$31.61', receipt_url: '#',
+    sender_name: 'Bob Wilson', sender_email: 'bob@example.com',
+    message: 'Hi, I am interested in your catering services for an upcoming event. Could you send me your menu and pricing? Thanks!',
+    reply_url: '#', expires_in: '24 hours'
+  };
+  if (vars && Array.isArray(vars)) {
+    vars.forEach(v => {
+      const key = typeof v === 'string' ? v : v.name || v;
+      const val = defaults[key] || `[${key}]`;
+      result = result.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), val);
+    });
+  }
+  // Catch any remaining
+  result = result.replace(/\{\{(\w+)\}\}/g, (_, k) => defaults[k] || `[${k}]`);
+  return result;
+}
+
+function renderCards() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  templates.forEach(t => {
+    const cat = CATEGORY_MAP[t.category] || 'system';
+    const isRec = cat === 'recommended';
+    const card = document.createElement('div');
+    card.className = 'card' + (currentFilter !== 'all' && cat !== currentFilter ? ' hidden' : '');
+    card.dataset.cat = cat;
+
+    const html = substituteVars(t.body_html || '', t.available_variables);
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+
+    card.innerHTML = `
+      <div class="card-header">
+        <h3>${t.name}</h3>
+        <span class="badge ${isRec ? 'recommended' : ''}">${isRec ? 'Recommended' : cat}</span>
+      </div>
+      <div class="card-subject">Subject: <span>${substituteVars(t.subject || '', t.available_variables)}</span></div>
+      <iframe class="preview-frame medium" src="${url}" sandbox="allow-same-origin"></iframe>
+      <div class="card-footer">
+        <span class="vars">${(t.available_variables || []).length} variables</span>
+        <button onclick="openFull('${t.id}')">Full Size</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function openFull(id) {
+  const t = templates.find(x => String(x.id) === String(id));
+  if (!t) return;
+  const html = substituteVars(t.body_html || '', t.available_variables);
+  const w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
+  w.document.title = t.name;
+}
+
+function setFilter(cat) {
+  currentFilter = cat;
+  document.querySelectorAll('.controls button').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
+  document.querySelectorAll('.card').forEach(c => {
+    c.classList.toggle('hidden', cat !== 'all' && c.dataset.cat !== cat);
+  });
+}
+
+function setLayout(cols) {
+  const grid = document.getElementById('grid');
+  grid.className = `grid cols-${cols}`;
+  const heights = { 1: 'tall', 2: 'medium', 3: 'short' };
+  grid.querySelectorAll('.preview-frame').forEach(f => {
+    f.className = `preview-frame ${heights[cols]}`;
+  });
+  document.querySelectorAll('.layout-controls button').forEach(b => b.classList.remove('active'));
+  document.getElementById('lay' + cols).classList.add('active');
+}
+
+function buildFilters() {
+  const el = document.getElementById('filters');
+  Object.entries(CATEGORIES).forEach(([key, label]) => {
+    const btn = document.createElement('button');
+    btn.textContent = label;
+    btn.dataset.cat = key;
+    btn.className = key === 'all' ? 'active' : '';
+    btn.onclick = () => setFilter(key);
+    el.appendChild(btn);
+  });
+}
+
+async function load() {
+  try {
+    const res = await fetch('/api/admin/email-templates', { credentials: 'include' });
+    if (!res.ok) throw new Error('API returned ' + res.status);
+    const json = await res.json();
+    templates = json.data?.templates || json.templates || json.data || [];
+    // Filter out the 3 bare original templates (tiny HTML)
+    templates = templates.filter(t => !['welcome', 'verification', 'password_reset'].includes(t.category) || (t.body_html && t.body_html.length > 500));
+    renderCards();
+  } catch (e) {
+    document.getElementById('grid').innerHTML = `<div class="error">Failed to load: ${e.message}<br><br>Make sure you're logged in as admin and the dev server is running.</div>`;
+  }
+}
+
+buildFilters();
+load();
+</script>
+</body>
+</html>

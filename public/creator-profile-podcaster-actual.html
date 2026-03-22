@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Podcaster Profile (Code-Accurate) — Bizconekt</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #f9fafb; color: #1a1a2e; line-height: 1.6; }
+
+  /* Biz brand colors */
+  .text-biz-navy { color: #1a1a2e; }
+  .text-biz-orange { color: #ed6437; }
+  .bg-biz-orange { background: #ed6437; }
+
+  /* Back Button Bar */
+  .back-bar { background: #fff; border-bottom: 1px solid #e5e7eb; }
+  .back-bar-inner { max-width: 80rem; margin: 0 auto; padding: 16px; }
+  .back-btn { display: flex; align-items: center; gap: 8px; color: #6b7280; font-size: 14px; background: none; border: none; cursor: pointer; transition: color 0.2s; }
+  .back-btn:hover { color: #1a1a2e; }
+  .back-btn svg { width: 16px; height: 16px; }
+
+  /* Container */
+  .container { max-width: 80rem; margin: 0 auto; padding: 0 16px; }
+
+  /* Hero Card */
+  .hero-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #f3f4f6; overflow: hidden; margin-top: 16px; }
+
+  .cover-banner { width: 100%; height: 192px; background: linear-gradient(to right, #f97316, #dc2626); position: relative; }
+
+  .hero-body { padding: 0 24px 24px; }
+  .hero-top { display: flex; flex-direction: row; align-items: flex-end; justify-content: space-between; gap: 16px; }
+  .avatar-wrap { margin-top: -64px; position: relative; z-index: 10; }
+  .avatar { width: 128px; height: 128px; border-radius: 50%; border: 4px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); overflow: hidden; background: linear-gradient(135deg, #f97316, #dc2626); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 40px; font-weight: 700; }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+  .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .btn-primary { display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; gap: 6px; padding: 8px 16px; font-size: 14px; background: #ed6437; color: #fff; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; transition: background 0.2s; }
+  .btn-primary:hover { background: #d55a31; }
+  .btn-secondary { display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; gap: 6px; padding: 8px 16px; font-size: 14px; font-weight: 600; border-radius: 8px; border: 2px solid #d1d5db; color: #374151; background: #fff; cursor: pointer; transition: border-color 0.2s; }
+  .btn-secondary:hover { border-color: #1a1a2e; }
+  .btn-recommend { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 14px; font-weight: 600; border-radius: 8px; border: 2px solid #d1d5db; color: #374151; background: #fff; cursor: pointer; }
+
+  .hero-info { margin-top: 16px; }
+  .podcast-name-label { font-size: 14px; color: #ea580c; font-weight: 500; margin-bottom: 4px; }
+  .hero-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .hero-name-row h1 { font-size: 30px; font-weight: 700; color: #1a1a2e; }
+  .verified-icon { width: 24px; height: 24px; color: #22c55e; }
+  .hero-headline { color: #6b7280; margin-top: 4px; font-size: 16px; }
+
+  .hero-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 12px; font-size: 14px; color: #9ca3af; }
+  .hero-meta span { display: flex; align-items: center; gap: 4px; }
+  .hero-meta svg { width: 16px; height: 16px; }
+  .rating-text { color: #d97706; font-weight: 600; }
+
+  /* Platform badges in hero */
+  .platforms-row { margin-top: 16px; }
+  .platforms-label { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #4b5563; margin-bottom: 8px; }
+  .platforms-label svg { width: 14px; height: 14px; color: #ea580c; }
+  .platforms-badges { display: flex; flex-wrap: wrap; gap: 8px; }
+  .badge-orange { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 500; background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+  .badge-gray { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 500; background: #f3f4f6; color: #4b5563; }
+  .genre-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+  /* Main Grid */
+  .main-grid { display: grid; grid-template-columns: 1fr; gap: 24px; margin-top: 24px; padding-bottom: 60px; }
+  @media (min-width: 1024px) { .main-grid { grid-template-columns: 2fr 1fr; } }
+
+  /* Content Cards */
+  .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #f3f4f6; padding: 24px; margin-bottom: 24px; }
+  .card h2 { font-size: 18px; font-weight: 600; color: #1a1a2e; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .card h2 svg { width: 20px; height: 20px; color: #ed6437; flex-shrink: 0; }
+  .card h2 .count { margin-left: 4px; font-size: 14px; font-weight: 400; color: #9ca3af; }
+
+  /* Bio */
+  .bio-text { color: #374151; line-height: 1.7; white-space: pre-line; max-height: 120px; overflow: hidden; position: relative; }
+  .bio-text.expanded { max-height: none; }
+  .bio-fade { position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(to top, #fff, transparent); }
+  .show-more-btn { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; color: #ed6437; font-size: 14px; font-weight: 600; background: none; border: none; cursor: pointer; }
+
+  .flex-wrap-gap { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  /* Episodes List */
+  .episode-list { display: flex; flex-direction: column; gap: 12px; }
+  .episode-item { border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; transition: border-color 0.2s; }
+  .episode-item:hover { border-color: #d1d5db; }
+  .episode-content { flex: 1; min-width: 0; }
+  .episode-meta-row { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+  .episode-ref { font-size: 12px; color: #9ca3af; }
+  .episode-date { font-size: 12px; color: #9ca3af; }
+  .episode-title { font-size: 14px; font-weight: 600; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+  .episode-desc { font-size: 12px; color: #6b7280; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 4px; }
+  .episode-guests { font-size: 12px; color: #ea580c; }
+  .episode-duration { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 500; color: #6b7280; white-space: nowrap; flex-shrink: 0; }
+  .episode-duration svg { width: 14px; height: 14px; color: #9ca3af; }
+
+  /* Guest Booking Info Box */
+  .booking-info-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; }
+  .booking-info-box p { font-size: 14px; color: #166534; line-height: 1.6; }
+
+  /* Monetization badges */
+  .badge-green { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 500; background: #f0fdf4; color: #15803d; border: 1px solid #dcfce7; }
+
+  /* Reviews */
+  .reviews-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .write-review-btn { padding: 6px 16px; font-size: 14px; font-weight: 600; color: #ed6437; border: 2px solid #ed6437; border-radius: 8px; background: #fff; cursor: pointer; transition: background 0.2s; }
+  .write-review-btn:hover { background: #fef2ee; }
+
+  .rating-summary { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #f3f4f6; }
+  .rating-big { font-size: 30px; font-weight: 700; color: #111827; }
+  .stars-row { display: flex; gap: 2px; }
+  .star-filled { color: #f59e0b; }
+  .star-empty { color: #e5e7eb; }
+
+  .review-item { padding-bottom: 16px; border-bottom: 1px solid #f3f4f6; margin-bottom: 16px; }
+  .review-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .review-row { display: flex; align-items: flex-start; gap: 12px; }
+  .review-avatar { width: 40px; height: 40px; border-radius: 50%; background: #1a1a2e; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; flex-shrink: 0; }
+  .review-body { flex: 1; min-width: 0; }
+  .review-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+  .review-name { font-size: 14px; font-weight: 500; color: #111827; }
+  .review-type-badge { font-size: 12px; padding: 2px 8px; background: #f3f4f6; color: #6b7280; border-radius: 4px; }
+  .review-text { font-size: 14px; color: #374151; margin-top: 8px; }
+  .review-date { font-size: 12px; color: #d1d5db; margin-top: 4px; }
+
+  .pagination { display: flex; justify-content: center; gap: 8px; margin-top: 24px; }
+  .pagination button { padding: 8px 16px; background: #f3f4f6; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; color: #374151; }
+  .pagination button:hover { background: #e5e7eb; }
+  .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .pagination .page-info { padding: 8px 16px; font-size: 14px; color: #6b7280; }
+
+  /* Sidebar */
+  .sidebar { display: flex; flex-direction: column; gap: 16px; }
+  .sidebar-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #f3f4f6; padding: 24px; }
+  .sidebar-card h3 { font-size: 16px; font-weight: 600; color: #1a1a2e; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .sidebar-card h3 svg { width: 20px; height: 20px; color: #ed6437; }
+
+  .stat-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .stat-row:last-child { margin-bottom: 0; }
+  .stat-row svg { width: 20px; height: 20px; color: #9ca3af; flex-shrink: 0; }
+  .stat-row .star-icon { color: #fbbf24; }
+  .stat-label { font-size: 12px; color: #9ca3af; }
+  .stat-value { font-size: 14px; font-weight: 600; color: #111827; }
+  .stat-value .sub { color: #9ca3af; font-weight: 400; margin-left: 4px; }
+
+  /* Subscribe Card */
+  .subscribe-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #f3f4f6; padding: 20px; }
+  .subscribe-heading { font-size: 12px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+  .subscribe-desc { font-size: 14px; color: #6b7280; margin-bottom: 16px; }
+  .follow-btn { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 16px; background: #ed6437; color: #fff; border: none; border-radius: 6px; font-size: 16px; font-weight: 500; cursor: pointer; justify-content: center; transition: background 0.2s; }
+  .follow-btn:hover { background: #d55a31; }
+  .follow-btn svg { width: 16px; height: 16px; }
+  .follower-count { text-align: center; font-size: 12px; color: #d1d5db; margin-top: 12px; }
+
+  /* Listen On sidebar */
+  .listen-on-badges { display: flex; flex-wrap: wrap; gap: 8px; }
+  .listen-badge { display: inline-flex; align-items: center; padding: 6px 12px; background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; border-radius: 8px; font-size: 13px; font-weight: 500; }
+
+  /* CTA */
+  .cta-btn { width: 100%; padding: 12px; background: #ed6437; color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .cta-btn:hover { background: #d55a31; }
+  .cta-count { text-align: center; font-size: 12px; color: #9ca3af; margin-top: 8px; }
+
+  /* Social */
+  .social-website { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #6b7280; text-decoration: none; margin-bottom: 12px; }
+  .social-website:hover { color: #1a1a2e; }
+  .social-website svg { width: 16px; height: 16px; color: #9ca3af; }
+  .social-icons { display: flex; flex-wrap: wrap; gap: 8px; }
+  .social-icon { width: 36px; height: 36px; border-radius: 8px; border: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: center; color: #9ca3af; text-decoration: none; transition: all 0.2s; font-size: 11px; font-weight: 700; }
+  .social-icon:hover { border-color: #d1d5db; }
+  .social-icon.fb:hover { color: #1877F2; }
+  .social-icon.ig:hover { color: #E4405F; }
+  .social-icon.tw:hover { color: #000; }
+  .social-icon.li:hover { color: #0A66C2; }
+  .social-icon.yt:hover { color: #FF0000; }
+  .social-icon.tt:hover { color: #000; }
+
+  @media (max-width: 1023px) {
+    .hero-top { flex-direction: column; align-items: flex-start; }
+    .avatar { width: 96px; height: 96px; font-size: 32px; }
+    .avatar-wrap { margin-top: -48px; }
+    .hero-name-row h1 { font-size: 24px; }
+    .cover-banner { height: 128px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Back Button Bar -->
+<div class="back-bar">
+  <div class="back-bar-inner">
+    <button class="back-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Back
+    </button>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Hero Card -->
+  <div class="hero-card">
+    <div class="cover-banner"></div>
+    <div class="hero-body">
+      <div class="hero-top">
+        <div class="avatar-wrap">
+          <div class="avatar">
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face" alt="Marcus Chen">
+          </div>
+        </div>
+        <div class="hero-actions">
+          <button class="btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Contact
+          </button>
+          <button class="btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Share
+          </button>
+          <button class="btn-recommend">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+            Recommend
+          </button>
+        </div>
+      </div>
+
+      <div class="hero-info">
+        <p class="podcast-name-label">The Growth Mindset Show</p>
+        <div class="hero-name-row">
+          <h1>Marcus Chen</h1>
+          <svg class="verified-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <p class="hero-headline">Host &amp; Executive Producer, The Growth Mindset Show</p>
+        <div class="hero-meta">
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            San Francisco, CA
+          </span>
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Member since January 2022
+          </span>
+          <span class="rating-text">4.8 (89 reviews)</span>
+        </div>
+
+        <!-- Platform badges -->
+        <div class="platforms-row">
+          <div class="platforms-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+            Listen on:
+          </div>
+          <div class="platforms-badges">
+            <span class="badge-orange">Spotify</span>
+            <span class="badge-orange">Apple Podcasts</span>
+            <span class="badge-orange">Google Podcasts</span>
+            <span class="badge-orange">YouTube</span>
+            <span class="badge-orange">Overcast</span>
+          </div>
+        </div>
+
+        <!-- Genre badges -->
+        <div class="genre-row">
+          <span class="badge-gray">Business</span>
+          <span class="badge-gray">Entrepreneurship</span>
+          <span class="badge-gray">Self-Improvement</span>
+          <span class="badge-gray">Leadership</span>
+          <span class="badge-gray">Technology</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="main-grid">
+    <!-- Content Column -->
+    <div>
+
+      <!-- About -->
+      <div class="card">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          About
+        </h2>
+        <div class="bio-text" id="bio">
+I'm Marcus Chen, host and executive producer of The Growth Mindset Show — one of the top-ranked business and entrepreneurship podcasts with over 1.8 million downloads and 312 episodes published since 2022.
+
+Every week I sit down with world-class founders, investors, and thinkers to extract the mindset frameworks and tactical strategies that drive extraordinary results. Past guests include executives from Fortune 500 companies, unicorn startup founders, and bestselling authors. My mission is to make elite-level thinking accessible to ambitious professionals and entrepreneurs worldwide.
+
+I'm open to sponsorships, guest collaborations, and live event partnerships that align with my audience's values around growth, business, and personal development.</div>
+        <div class="bio-fade" id="bioFade"></div>
+        <button class="show-more-btn" onclick="document.getElementById('bio').classList.toggle('expanded');this.textContent=this.textContent==='Show More'?'Show Less':'Show More';document.getElementById('bioFade').style.display=document.getElementById('bio').classList.contains('expanded')?'none':'block';">Show More</button>
+      </div>
+
+      <!-- Genres -->
+      <div class="card">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          Genres
+        </h2>
+        <div class="flex-wrap-gap">
+          <span class="badge-orange">Business</span>
+          <span class="badge-orange">Entrepreneurship</span>
+          <span class="badge-orange">Self-Improvement</span>
+          <span class="badge-orange">Leadership</span>
+          <span class="badge-orange">Technology</span>
+          <span class="badge-orange">Investing</span>
+          <span class="badge-orange">Mindset</span>
+        </div>
+      </div>
+
+      <!-- Recent Episodes -->
+      <div class="card">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          Recent Episodes <span class="count">(312)</span>
+        </h2>
+        <div class="episode-list">
+
+          <!-- Episode 1 -->
+          <div class="episode-item">
+            <div class="episode-content">
+              <div class="episode-meta-row">
+                <span class="episode-ref">S6 E12</span>
+                <span class="episode-date">Mar 10, 2026</span>
+              </div>
+              <div class="episode-title">How to Build a $100M Business Without Outside Funding</div>
+              <div class="episode-desc">Priya Sharma shares the bootstrapping playbook she used to take her SaaS company from zero to $100M ARR in five years with no VC money and a team of just 40 people.</div>
+              <div class="episode-guests">Guests: Priya Sharma</div>
+            </div>
+            <div class="episode-duration">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              58m
+            </div>
+          </div>
+
+          <!-- Episode 2 -->
+          <div class="episode-item">
+            <div class="episode-content">
+              <div class="episode-meta-row">
+                <span class="episode-ref">S6 E11</span>
+                <span class="episode-date">Mar 3, 2026</span>
+              </div>
+              <div class="episode-title">The Contrarian Framework: Why Conventional Wisdom Kills Innovation</div>
+              <div class="episode-desc">A deep dive into the mental models that separate first-principles thinkers from the crowd, with frameworks you can apply to your business starting today.</div>
+              <div class="episode-guests">Guests: David Okafor, Yuki Tanaka</div>
+            </div>
+            <div class="episode-duration">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              1h 3m
+            </div>
+          </div>
+
+          <!-- Episode 3 -->
+          <div class="episode-item">
+            <div class="episode-content">
+              <div class="episode-meta-row">
+                <span class="episode-ref">S6 E10</span>
+                <span class="episode-date">Feb 24, 2026</span>
+              </div>
+              <div class="episode-title">Mastering the Art of High-Stakes Negotiation</div>
+              <div class="episode-desc">Former FBI negotiator turned startup advisor breaks down the exact tactics used in high-pressure situations and how to apply them in boardrooms, fundraising, and hiring.</div>
+              <div class="episode-guests">Guests: Carlos Mendez</div>
+            </div>
+            <div class="episode-duration">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              52m
+            </div>
+          </div>
+
+          <!-- Episode 4 -->
+          <div class="episode-item">
+            <div class="episode-content">
+              <div class="episode-meta-row">
+                <span class="episode-ref">S6 E9</span>
+                <span class="episode-date">Feb 17, 2026</span>
+              </div>
+              <div class="episode-title">AI-First Startups: Building When the Landscape Shifts Monthly</div>
+              <div class="episode-desc">Two founders of AI-native companies discuss the unique challenges of building products on top of rapidly evolving foundation models, and how to stay ahead of the curve.</div>
+              <div class="episode-guests">Guests: Aisha Williams, Ravi Patel</div>
+            </div>
+            <div class="episode-duration">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              1h 11m
+            </div>
+          </div>
+
+          <!-- Episode 5 -->
+          <div class="episode-item">
+            <div class="episode-content">
+              <div class="episode-meta-row">
+                <span class="episode-ref">S6 E8</span>
+                <span class="episode-date">Feb 10, 2026</span>
+              </div>
+              <div class="episode-title">From Employee to Founder: The Mindset Shift No One Talks About</div>
+              <div class="episode-desc">Marcus goes solo for this highly requested episode on the psychological and operational shifts required when making the leap from corporate career to running your own company.</div>
+              <div class="episode-guests">Guests: Solo episode</div>
+            </div>
+            <div class="episode-duration">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              44m
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Guest Booking -->
+      <div class="card">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
+          Guest Booking
+        </h2>
+        <div class="booking-info-box">
+          <p>I welcome compelling guests who bring deep expertise, contrarian perspectives, or extraordinary stories relevant to business, entrepreneurship, mindset, and technology. Ideal guests have a proven track record, a unique angle, and are comfortable in long-form conversation format.</p>
+          <p style="margin-top: 10px;">To pitch yourself or a client as a guest, use the Contact button above to send a brief overview including your background, the topic you would cover, and why it serves The Growth Mindset Show audience.</p>
+        </div>
+      </div>
+
+      <!-- Monetization Methods -->
+      <div class="card">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Monetization Methods
+        </h2>
+        <div class="flex-wrap-gap">
+          <span class="badge-green">Sponsorships</span>
+          <span class="badge-green">Premium Episodes</span>
+          <span class="badge-green">Live Events</span>
+          <span class="badge-green">Merchandise</span>
+        </div>
+      </div>
+
+      <!-- Reviews -->
+      <div class="card">
+        <div class="reviews-header">
+          <h2 style="margin-bottom:0;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Reviews <span class="count">(89)</span>
+          </h2>
+          <button class="write-review-btn">Write a Review</button>
+        </div>
+
+        <div class="rating-summary">
+          <span class="rating-big">4.8</span>
+          <div>
+            <div class="stars-row">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#e5e7eb" stroke="#e5e7eb" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+            </div>
+            <p style="font-size:14px;color:#9ca3af;margin-top:4px;">89 reviews</p>
+          </div>
+        </div>
+
+        <div class="review-item">
+          <div class="review-row">
+            <div class="review-avatar">NP</div>
+            <div class="review-body">
+              <div class="review-name-row">
+                <span class="review-name">Nina Patel</span>
+                <span class="review-type-badge">Sponsorship</span>
+              </div>
+              <div class="stars-row">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+              </div>
+              <p class="review-text">Sponsoring The Growth Mindset Show drove an exceptional return for us. Marcus's audience is highly engaged and trust his recommendations. Our mid-roll spot generated a 6.2x return in the first month. Will absolutely continue the partnership.</p>
+              <p class="review-date">03/01/2026</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="review-item">
+          <div class="review-row">
+            <div class="review-avatar">TR</div>
+            <div class="review-body">
+              <div class="review-name-row">
+                <span class="review-name">Thomas Reeves</span>
+                <span class="review-type-badge">Guest Appearance</span>
+              </div>
+              <div class="stars-row">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+              </div>
+              <p class="review-text">Being a guest on The Growth Mindset Show was one of the highest-quality podcast experiences I've had. Marcus did thorough pre-interview research, asked genuinely insightful questions, and created a conversation that felt natural and impactful. My book sales spiked 40% the week the episode dropped.</p>
+              <p class="review-date">02/08/2026</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="review-item">
+          <div class="review-row">
+            <div class="review-avatar">SC</div>
+            <div class="review-body">
+              <div class="review-name-row">
+                <span class="review-name">Sofia Cardenas</span>
+                <span class="review-type-badge">Live Event</span>
+              </div>
+              <div class="stars-row">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#e5e7eb" stroke="#e5e7eb"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+              </div>
+              <p class="review-text">We partnered with Marcus for our annual summit and his live podcast recording was a highlight of the entire event. The audience engagement was incredible. A few logistics hiccups on scheduling but he handled it with total professionalism.</p>
+              <p class="review-date">01/15/2026</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pagination">
+          <button disabled>Previous</button>
+          <span class="page-info">Page 1 of 18</span>
+          <button>Next</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+
+      <!-- Quick Stats -->
+      <div class="sidebar-card">
+        <h3>Quick Stats</h3>
+        <div class="stat-row">
+          <!-- Mic icon -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          <div><div class="stat-label">Total Episodes</div><div class="stat-value">312</div></div>
+        </div>
+        <div class="stat-row">
+          <!-- Download icon -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <div><div class="stat-label">Downloads</div><div class="stat-value">1.8M</div></div>
+        </div>
+        <div class="stat-row">
+          <!-- Clock icon -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <div><div class="stat-label">Avg Episode Length</div><div class="stat-value">54m</div></div>
+        </div>
+        <div class="stat-row">
+          <svg class="star-icon" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <div><div class="stat-label">Rating</div><div class="stat-value">4.8 / 5.0 <span class="sub">(89)</span></div></div>
+        </div>
+      </div>
+
+      <!-- ContentSubscribeCard -->
+      <div class="subscribe-card">
+        <div class="subscribe-heading">Follow Podcaster</div>
+        <p class="subscribe-desc">Follow The Growth Mindset Show to get notified when new episodes drop.</p>
+        <button class="follow-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          Follow The Growth Mindset Show
+        </button>
+        <p class="follower-count">2,413 followers</p>
+      </div>
+
+      <!-- Listen On -->
+      <div class="sidebar-card">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+          Listen On
+        </h3>
+        <div class="listen-on-badges">
+          <span class="listen-badge">Spotify</span>
+          <span class="listen-badge">Apple Podcasts</span>
+          <span class="listen-badge">Google Podcasts</span>
+          <span class="listen-badge">YouTube</span>
+          <span class="listen-badge">Overcast</span>
+        </div>
+      </div>
+
+      <!-- Guest Booking CTA -->
+      <div class="sidebar-card">
+        <button class="cta-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
+          Book as Guest
+        </button>
+        <p class="cta-count">74 people have reached out</p>
+      </div>
+
+      <!-- Social Links -->
+      <div class="sidebar-card">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Connect
+        </h3>
+        <a href="#" class="social-website">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          growthmindsetshow.com
+        </a>
+        <div class="social-icons">
+          <a href="#" class="social-icon yt" title="YouTube">YT</a>
+          <a href="#" class="social-icon ig" title="Instagram">IG</a>
+          <a href="#" class="social-icon tw" title="Twitter/X">X</a>
+          <a href="#" class="social-icon li" title="LinkedIn">LI</a>
+          <a href="#" class="social-icon tt" title="TikTok">TT</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,465 @@
+// GOVERNANCE: Service Architecture v2.0 compliance
+// GOVERNANCE: DatabaseService boundary for all DB access
+// GOVERNANCE: Cloudinary SDK for cloud storage
+// GOVERNANCE: Environment variables for configuration
+// PHASE 2.1: Universal Media Manager (UMM) Implementation
+
+import { getDatabaseService } from '@core/services/DatabaseService';
+import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
+import { RowDataPacket, ResultSetHeader } from 'mysql2';
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import sharp from 'sharp';
+
+/**
+ * Universal Media Manager (UMM) Service
+ * Handles media storage routing, upload, retrieval, and deletion
+ */
+
+export interface MediaFile {
+  id: number;
+  storage_type: 'local' | 'cloudinary';
+  path: string;
+  url: string;
+  cloudinary_public_id: string | null;
+  file_type: string;
+  file_size: number;
+  width: number | null;
+  height: number | null;
+  metadata: Record<string, any> | null;
+  is_mock: boolean;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface EntityMediaRelationship {
+  id: number;
+  entity_type: string;
+  entity_id: number;
+  media_file_id: number;
+  media_type: 'logo' | 'cover' | 'gallery' | 'video' | 'document' | 'avatar' | 'banner';
+  is_primary: boolean;
+  display_order: number;
+  created_at: Date;
+}
+
+export interface UploadOptions {
+  entityType: 'site' | 'user' | 'listing' | 'offer' | 'event' | 'temporary' | 'marketing' | 'document';
+  entityId: number | null;
+  mediaType: EntityMediaRelationship['media_type'];
+  userTier?: 'visitor' | 'general' | 'essentials' | 'plus' | 'preferred' | 'premium';
+  listingTier?: 'essentials' | 'plus' | 'preferred' | 'premium';
+  file: Buffer;
+  filename: string;
+  mimeType: string;
+}
+
+export interface MediaQueryOptions {
+  entityType: string;
+  entityId: number;
+  mediaType?: EntityMediaRelationship['media_type'];
+  primaryOnly?: boolean;
+}
+
+export interface MediaStatistics {
+  total_files: number;
+  total_size_mb: number;
+  by_storage: {
+    local: { count: number; size_mb: number };
+    cloudinary: { count: number; size_mb: number };
+  };
+  by_entity_type: Record<string, number>;
+  orphaned_count: number;
+}
+
+export class MediaService {
+  private db: ReturnType<typeof getDatabaseService>;
+  private uploadRoot: string;
+  private publicUrl: string;
+
+  constructor() {
+    this.db = getDatabaseService();
+    this.uploadRoot = path.join(process.cwd(), 'public', 'uploads');
+    this.publicUrl = process.env.APP_ORIGIN || 'http://localhost:3000';
+
+    // GOVERNANCE: Configure Cloudinary from environment
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET
+    });
+  }
+
+  /**
+   * Determine storage destination based on entity and tier
+   * GOVERNANCE: Follow BuildSpecs Section 19 routing logic
+   */
+  private determineStorageType(
+    entityType: UploadOptions['entityType'],
+    userTier?: UploadOptions['userTier'],
+    listingTier?: UploadOptions['listingTier']
+  ): 'local' | 'cloudinary' {
+    if (entityType === 'site') return 'local';
+    if (entityType === 'temporary') return 'local';
+    if (entityType === 'document') return 'local';
+    if (entityType === 'marketing') return 'cloudinary';
+
+    if (entityType === 'user') {
+      return (userTier === 'premium' || userTier === 'preferred') ? 'cloudinary' : 'local';
+    }
+
+    if (entityType === 'listing' || entityType === 'offer' || entityType === 'event') {
+      return (listingTier === 'preferred' || listingTier === 'premium') ? 'cloudinary' : 'local';
+    }
+
+    return 'local';
+  }
+
+  /**
+   * Check if media type should overwrite (logo/cover) or append (gallery)
+   */
+  private shouldOverwrite(mediaType: EntityMediaRelationship['media_type']): boolean {
+    return ['logo', 'cover', 'avatar'].includes(mediaType);
+  }
+
+  /**
+   * Upload media file (main entry point)
+   * GOVERNANCE: Handles both LOCAL and CLOUDINARY storage
+   */
+  async uploadMedia(options: UploadOptions): Promise<MediaFile & EntityMediaRelationship> {
+    const storageType = this.determineStorageType(
+      options.entityType,
+      options.userTier,
+      options.listingTier
+    );
+
+    // Handle overwrite logic
+    if (this.shouldOverwrite(options.mediaType) && options.entityId) {
+      await this.deleteExistingMedia(options.entityType, options.entityId, options.mediaType);
+    }
+
+    // Upload to storage
+    const mediaFile = storageType === 'cloudinary'
+      ? await this.uploadToCloudinary(options)
+      : await this.uploadToLocal(options);
+
+    // Create relationship (if entityId provided)
+    if (options.entityId) {
+      const relationship = await this.createRelationship({
+        entity_type: options.entityType,
+        entity_id: options.entityId,
+        media_file_id: mediaFile.id,
+        media_type: options.mediaType,
+        is_primary: this.shouldOverwrite(options.mediaType),
+        display_order: 0
+      });
+
+      return { ...mediaFile, ...relationship };
+    }
+
+    return mediaFile as any;
+  }
+
+  /**
+   * Upload to LOCAL storage
+   */
+  private async uploadToLocal(options: UploadOptions): Promise<MediaFile> {
+    const timestamp = Date.now();
+    const sanitizedFilename = options.filename.replace(/[^a-zA-Z0-9.-]/g, '_');
+    const filename = `${timestamp}_${sanitizedFilename}`;
+
+    const folder = options.entityType === 'site' ? 'site' :
+                   options.entityType === 'temporary' ? 'temp' :
+                   options.entityType === 'user' && options.entityId ? `users/${options.entityId}` :
+                   options.entityType === 'listing' && options.entityId ? `listings/${options.entityId}` :
+                   'misc';
+
+    const relativePath = path.join(folder, filename);
+    const absolutePath = path.join(this.uploadRoot, relativePath);
+
+    // Ensure directory exists
+    await fs.mkdir(path.dirname(absolutePath), { recursive: true });
+
+    // Get image dimensions if applicable
+    let width: number | null = null;
+    let height: number | null = null;
+    if (options.mimeType.startsWith('image/')) {
+      const metadata = await sharp(options.file).metadata();
+      width = metadata.width || null;
+      height = metadata.height || null;
+    }
+
+    // Write file
+    await fs.writeFile(absolutePath, options.file);
+
+    // Create database record
+    const url = `${this.publicUrl}/uploads/${relativePath.replace(/\\/g, '/')}`;
+    const result = await this.db.query<ResultSetHeader>(
+      `INSERT INTO media_files (storage_type, path, url, file_type, file_size, width, height)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      ['local', relativePath, url, options.mimeType, options.file.length, width, height]
+    );
+
+    return this.getMediaFileById(result.insertId!);
+  }
+
+  /**
+   * Upload to CLOUDINARY storage
+   */
+  private async uploadToCloudinary(options: UploadOptions): Promise<MediaFile> {
+    const folder = options.entityType === 'marketing' ? 'marketing' :
+                   options.entityType === 'user' && options.entityId ? `users/${options.entityId}` :
+                   options.entityType === 'listing' && options.entityId ? `listings/${options.entityId}` :
+                   'misc';
+
+    // Upload to Cloudinary
+    const uploadResult: UploadApiResponse = await new Promise((resolve, reject) => {
+      cloudinary.uploader.upload_stream(
+        { folder, resource_type: 'auto' },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result!);
+        }
+      ).end(options.file);
+    });
+
+    // Create database record
+    const result = await this.db.query<ResultSetHeader>(
+      `INSERT INTO media_files (
+        storage_type, path, url, cloudinary_public_id, file_type, file_size,
+        width, height, metadata
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        'cloudinary',
+        uploadResult.public_id,
+        uploadResult.secure_url,
+        uploadResult.public_id,
+        uploadResult.format ? `image/${uploadResult.format}` : options.mimeType,
+        uploadResult.bytes,
+        uploadResult.width || null,
+        uploadResult.height || null,
+        JSON.stringify(uploadResult)
+      ]
+    );
+
+    return this.getMediaFileById(result.insertId!);
+  }
+
+  /**
+   * Get media for entity
+   */
+  async getMediaForEntity(options: MediaQueryOptions): Promise<(MediaFile & EntityMediaRelationship)[]> {
+    let query = `
+      SELECT
+        mf.*,
+        emr.id as relationship_id,
+        emr.entity_type,
+        emr.entity_id,
+        emr.media_type,
+        emr.is_primary,
+        emr.display_order
+      FROM entity_media_relationships emr
+      JOIN media_files mf ON emr.media_file_id = mf.id
+      WHERE emr.entity_type = ? AND emr.entity_id = ?
+    `;
+    const params: any[] = [options.entityType, options.entityId];
+
+    if (options.mediaType) {
+      query += ' AND emr.media_type = ?';
+      params.push(options.mediaType);
+    }
+
+    if (options.primaryOnly) {
+      query += ' AND emr.is_primary = TRUE';
+    }
+
+    query += ' ORDER BY emr.display_order ASC, emr.created_at ASC';
+
+    const results = await this.db.query<RowDataPacket>(query, params);
+    return results.rows as any;
+  }
+
+  /**
+   * Get primary media for entity and type
+   */
+  async getPrimaryMedia(
+    entityType: string,
+    entityId: number,
+    mediaType: EntityMediaRelationship['media_type']
+  ): Promise<(MediaFile & EntityMediaRelationship) | null> {
+    const results = await this.getMediaForEntity({
+      entityType,
+      entityId,
+      mediaType,
+      primaryOnly: true
+    });
+    return results[0] || null;
+  }
+
+  /**
+   * Delete media and cleanup storage
+   */
+  async deleteMedia(mediaId: number): Promise<void> {
+    const mediaFile = await this.getMediaFileById(mediaId);
+
+    // Delete from storage
+    if (mediaFile.storage_type === 'cloudinary' && mediaFile.cloudinary_public_id) {
+      await cloudinary.uploader.destroy(mediaFile.cloudinary_public_id);
+    } else if (mediaFile.storage_type === 'local') {
+      const absolutePath = path.join(this.uploadRoot, mediaFile.path);
+      await fs.unlink(absolutePath).catch(() => {}); // Ignore errors if file doesn't exist
+    }
+
+    // Delete from database (CASCADE will handle relationships)
+    await this.db.query('DELETE FROM media_files WHERE id = ?', [mediaId]);
+  }
+
+  /**
+   * Delete existing media for entity (used for overwrite logic)
+   */
+  private async deleteExistingMedia(
+    entityType: string,
+    entityId: number,
+    mediaType: EntityMediaRelationship['media_type']
+  ): Promise<void> {
+    const existing = await this.getMediaForEntity({ entityType, entityId, mediaType });
+    for (const media of existing) {
+      await this.deleteMedia(media.id);
+    }
+  }
+
+  /**
+   * Helper: Get media file by ID
+   */
+  private async getMediaFileById(id: number): Promise<MediaFile> {
+    const results = await this.db.query<RowDataPacket>(
+      'SELECT * FROM media_files WHERE id = ?',
+      [id]
+    );
+    if (results.rows.length === 0) {
+      throw new Error(`Media file not found: ${id}`);
+    }
+    return results.rows[0] as MediaFile;
+  }
+
+  /**
+   * Helper: Create entity-media relationship
+   */
+  private async createRelationship(
+    data: Omit<EntityMediaRelationship, 'id' | 'created_at'>
+  ): Promise<EntityMediaRelationship> {
+    const result = await this.db.query<ResultSetHeader>(
+      `INSERT INTO entity_media_relationships
+       (entity_type, entity_id, media_file_id, media_type, is_primary, display_order)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [
+        data.entity_type,
+        data.entity_id,
+        data.media_file_id,
+        data.media_type,
+        data.is_primary,
+        data.display_order
+      ]
+    );
+
+    const relationships = await this.db.query<RowDataPacket>(
+      'SELECT * FROM entity_media_relationships WHERE id = ?',
+      [result.insertId!]
+    );
+    return relationships.rows[0] as EntityMediaRelationship;
+  }
+
+  /**
+   * Get orphaned media files (no entity relationships)
+   * Used by Admin Media Manager to identify unused files
+   * @returns Array of media files without entity relationships
+   */
+  async getOrphanedMedia(): Promise<MediaFile[]> {
+    const query = `
+      SELECT m.* FROM media_files m
+      LEFT JOIN entity_media_relationships r ON m.id = r.media_file_id
+      WHERE r.media_file_id IS NULL
+      ORDER BY m.created_at DESC
+    `;
+    const results = await this.db.query<RowDataPacket>(query);
+    return results.rows as MediaFile[];
+  }
+
+  /**
+   * Delete all orphaned media files
+   * Used by Admin Media Manager for cleanup operations
+   * @returns Object with count of deleted files
+   */
+  async bulkDeleteOrphaned(): Promise<{ deletedCount: number }> {
+    const orphans = await this.getOrphanedMedia();
+    let deletedCount = 0;
+
+    for (const media of orphans) {
+      try {
+        await this.deleteMedia(media.id);
+        deletedCount++;
+      } catch (error) {
+      }
+    }
+
+    return { deletedCount };
+  }
+
+  /**
+   * Get storage statistics
+   * Used by Admin Media Manager for analytics dashboard
+   * @returns Comprehensive storage statistics
+   */
+  async getStorageStatistics(): Promise<MediaStatistics> {
+    const query = `
+      SELECT
+        COUNT(*) as total_files,
+        SUM(file_size) as total_size,
+        SUM(CASE WHEN storage_type = 'local' THEN 1 ELSE 0 END) as local_count,
+        SUM(CASE WHEN storage_type = 'local' THEN file_size ELSE 0 END) as local_size,
+        SUM(CASE WHEN storage_type = 'cloudinary' THEN 1 ELSE 0 END) as cloudinary_count,
+        SUM(CASE WHEN storage_type = 'cloudinary' THEN file_size ELSE 0 END) as cloudinary_size
+      FROM media_files
+    `;
+
+    const entityTypeQuery = `
+      SELECT
+        emr.entity_type,
+        COUNT(DISTINCT mf.id) as entity_count
+      FROM entity_media_relationships emr
+      JOIN media_files mf ON emr.media_file_id = mf.id
+      GROUP BY emr.entity_type
+    `;
+
+    const [statsResults, entityResults] = await Promise.all([
+      this.db.query<RowDataPacket>(query),
+      this.db.query<RowDataPacket>(entityTypeQuery)
+    ]);
+
+    const stats = statsResults.rows[0] as any;
+    const orphanedCount = (await this.getOrphanedMedia()).length;
+
+    const by_entity_type: Record<string, number> = {};
+    for (const row of entityResults.rows) {
+      const r = row as any;
+      by_entity_type[r.entity_type] = r.entity_count;
+    }
+
+    return {
+      total_files: stats.total_files || 0,
+      total_size_mb: ((stats.total_size || 0) / 1024 / 1024),
+      by_storage: {
+        local: {
+          count: stats.local_count || 0,
+          size_mb: ((stats.local_size || 0) / 1024 / 1024)
+        },
+        cloudinary: {
+          count: stats.cloudinary_count || 0,
+          size_mb: ((stats.cloudinary_size || 0) / 1024 / 1024)
+        }
+      },
+      by_entity_type,
+      orphaned_count: orphanedCount
+    };
+  }
+}

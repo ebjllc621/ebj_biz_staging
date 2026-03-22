@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Affiliate Marketer Profile (Code-Accurate) — Bizconekt</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #f9fafb; color: #1a1a2e; line-height: 1.6; }
+
+  /* Biz brand colors */
+  .text-biz-navy { color: #1a1a2e; }
+  .text-biz-orange { color: #ed6437; }
+  .bg-biz-orange { background: #ed6437; }
+
+  /* Back Button Bar */
+  .back-bar { background: #fff; border-bottom: 1px solid #e5e7eb; }
+  .back-bar-inner { max-width: 80rem; margin: 0 auto; padding: 16px; }
+  .back-btn { display: flex; align-items: center; gap: 8px; color: #6b7280; font-size: 14px; background: none; border: none; cursor: pointer; transition: color 0.2s; }
+  .back-btn:hover { color: #1a1a2e; }
+  .back-btn svg { width: 16px; height: 16px; }
+
+  /* Container */
+  .container { max-width: 80rem; margin: 0 auto; padding: 0 16px; }
+
+  /* Hero Card */
+  .hero-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #f3f4f6; overflow: hidden; margin-top: 16px; }
+
+  .cover-banner { width: 100%; height: 192px; background: linear-gradient(to right, #2563eb, #9333ea); position: relative; }
+
+  .hero-body { padding: 0 24px 24px; }
+  .hero-top { display: flex; flex-direction: row; align-items: flex-end; justify-content: space-between; gap: 16px; }
+  .avatar-wrap { margin-top: -64px; position: relative; z-index: 10; }
+  .avatar { width: 128px; height: 128px; border-radius: 50%; border: 4px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); overflow: hidden; background: linear-gradient(135deg, #3b82f6, #9333ea); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 40px; font-weight: 700; }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+  .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .btn-primary { display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; gap: 6px; padding: 8px 16px; font-size: 14px; background: #ed6437; color: #fff; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; transition: background 0.2s; }
+  .btn-primary:hover { background: #d55a31; }
+  .btn-secondary { display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; gap: 6px; padding: 8px 16px; font-size: 14px; font-weight: 600; border-radius: 8px; border: 2px solid #d1d5db; color: #374151; background: #fff; cursor: pointer; transition: border-color 0.2s; }
+  .btn-secondary:hover { border-color: #1a1a2e; }
+  .btn-recommend { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 14px; font-weight: 600; border-radius: 8px; border: 2px solid #d1d5db; color: #374151; background: #fff; cursor: pointer; }
+
+  .hero-info { margin-top: 16px; }
+  .hero-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .hero-name-row h1 { font-size: 30px; font-weight: 700; color: #1a1a2e; }
+  .verified-icon { width: 24px; height: 24px; color: #22c55e; }
+  .hero-headline { color: #6b7280; margin-top: 4px; font-size: 16px; }
+
+  .hero-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 12px; font-size: 14px; color: #9ca3af; }
+  .hero-meta span { display: flex; align-items: center; gap: 4px; }
+  .hero-meta svg { width: 16px; height: 16px; }
+  .rating-text { color: #d97706; font-weight: 600; }
+
+  .hero-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .badge-blue { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 500; background: #eff6ff; color: #1d4ed8; border: 1px solid #dbeafe; }
+
+  /* Main Grid */
+  .main-grid { display: grid; grid-template-columns: 1fr; gap: 24px; margin-top: 24px; padding-bottom: 60px; }
+  @media (min-width: 1024px) { .main-grid { grid-template-columns: 2fr 1fr; } }
+
+  /* Content Cards */
+  .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #f3f4f6; padding: 24px; margin-bottom: 24px; }
+  .card h2 { font-size: 18px; font-weight: 600; color: #1a1a2e; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .card h2 svg { width: 20px; height: 20px; color: #ed6437; flex-shrink: 0; }
+  .card h2 .count { margin-left: 4px; font-size: 14px; font-weight: 400; color: #9ca3af; }
+
+  /* Bio */
+  .bio-text { color: #374151; line-height: 1.7; white-space: pre-line; max-height: 120px; overflow: hidden; position: relative; }
+  .bio-text.expanded { max-height: none; }
+  .bio-fade { position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(to top, #fff, transparent); }
+  .show-more-btn { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; color: #ed6437; font-size: 14px; font-weight: 600; background: none; border: none; cursor: pointer; }
+
+  /* Badges */
+  .badge-purple { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 500; background: #faf5ff; color: #7c3aed; border: 1px solid #ede9fe; }
+  .badge-green { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 500; background: #f0fdf4; color: #15803d; border: 1px solid #dcfce7; }
+  .badge-gray { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 500; background: #f3f4f6; color: #4b5563; }
+
+  .flex-wrap-gap { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  /* Portfolio Grid */
+  .portfolio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 768px) { .portfolio-grid { grid-template-columns: 1fr; } }
+  .portfolio-item { border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; transition: border-color 0.2s; }
+  .portfolio-item:hover { border-color: #d1d5db; }
+  .portfolio-brand { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .brand-initial { width: 32px; height: 32px; border-radius: 50%; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; color: #6b7280; }
+  .portfolio-brand span { font-size: 14px; font-weight: 500; color: #1f2937; }
+  .portfolio-item h3 { font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 4px; }
+  .portfolio-item .desc { font-size: 12px; color: #6b7280; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 8px; }
+  .portfolio-results { font-size: 12px; color: #15803d; background: #f0fdf4; border-radius: 4px; padding: 4px 8px; margin-bottom: 8px; }
+  .portfolio-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding-top: 8px; border-top: 1px solid #f3f4f6; }
+  .portfolio-footer .meta { font-size: 12px; color: #9ca3af; display: flex; gap: 12px; }
+  .portfolio-footer .link { font-size: 12px; color: #ed6437; text-decoration: none; font-weight: 600; }
+  .portfolio-footer .link:hover { text-decoration: underline; }
+
+  /* Reviews */
+  .reviews-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .write-review-btn { padding: 6px 16px; font-size: 14px; font-weight: 600; color: #ed6437; border: 2px solid #ed6437; border-radius: 8px; background: #fff; cursor: pointer; transition: background 0.2s; }
+  .write-review-btn:hover { background: #fef2ee; }
+
+  .rating-summary { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #f3f4f6; }
+  .rating-big { font-size: 30px; font-weight: 700; color: #111827; }
+  .stars-row { display: flex; gap: 2px; }
+  .star-filled { color: #f59e0b; }
+  .star-empty { color: #e5e7eb; }
+
+  .review-item { padding-bottom: 16px; border-bottom: 1px solid #f3f4f6; margin-bottom: 16px; }
+  .review-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .review-row { display: flex; align-items: flex-start; gap: 12px; }
+  .review-avatar { width: 40px; height: 40px; border-radius: 50%; background: #1a1a2e; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; flex-shrink: 0; }
+  .review-body { flex: 1; min-width: 0; }
+  .review-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+  .review-name { font-size: 14px; font-weight: 500; color: #111827; }
+  .review-type-badge { font-size: 12px; padding: 2px 8px; background: #f3f4f6; color: #6b7280; border-radius: 4px; }
+  .review-text { font-size: 14px; color: #374151; margin-top: 8px; }
+  .review-date { font-size: 12px; color: #d1d5db; margin-top: 4px; }
+
+  .pagination { display: flex; justify-content: center; gap: 8px; margin-top: 24px; }
+  .pagination button { padding: 8px 16px; background: #f3f4f6; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; color: #374151; }
+  .pagination button:hover { background: #e5e7eb; }
+  .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .pagination .page-info { padding: 8px 16px; font-size: 14px; color: #6b7280; }
+
+  /* Sidebar */
+  .sidebar { display: flex; flex-direction: column; gap: 16px; }
+  .sidebar-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #f3f4f6; padding: 24px; }
+  .sidebar-card h3 { font-size: 16px; font-weight: 600; color: #1a1a2e; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .sidebar-card h3 svg { width: 20px; height: 20px; color: #ed6437; }
+
+  .stat-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .stat-row:last-child { margin-bottom: 0; }
+  .stat-row svg { width: 20px; height: 20px; color: #9ca3af; flex-shrink: 0; }
+  .stat-row .star-icon { color: #fbbf24; }
+  .stat-label { font-size: 12px; color: #9ca3af; }
+  .stat-value { font-size: 14px; font-weight: 600; color: #111827; }
+  .stat-value .sub { color: #9ca3af; font-weight: 400; margin-left: 4px; }
+
+  /* Subscribe Card */
+  .subscribe-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #f3f4f6; padding: 20px; }
+  .subscribe-heading { font-size: 12px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+  .subscribe-desc { font-size: 14px; color: #6b7280; margin-bottom: 16px; }
+  .follow-btn { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 16px; background: #ed6437; color: #fff; border: none; border-radius: 6px; font-size: 16px; font-weight: 500; cursor: pointer; justify-content: center; transition: background 0.2s; }
+  .follow-btn:hover { background: #d55a31; }
+  .follow-btn svg { width: 16px; height: 16px; }
+  .follower-count { text-align: center; font-size: 12px; color: #d1d5db; margin-top: 12px; }
+
+  /* Rate card */
+  .rate-row { margin-bottom: 12px; }
+  .rate-row:last-child { margin-bottom: 0; }
+  .rate-label { font-size: 12px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
+  .rate-value { font-size: 14px; font-weight: 600; color: #111827; }
+
+  /* Audience */
+  .audience-row { display: flex; justify-content: space-between; padding: 4px 0; }
+  .audience-row .label { font-size: 14px; color: #6b7280; }
+  .audience-row .value { font-size: 14px; font-weight: 500; }
+
+  /* CTA */
+  .cta-btn { width: 100%; padding: 12px; background: #ed6437; color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+  .cta-btn:hover { background: #d55a31; }
+  .cta-count { text-align: center; font-size: 12px; color: #9ca3af; margin-top: 8px; }
+
+  /* Social */
+  .social-website { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #6b7280; text-decoration: none; margin-bottom: 12px; }
+  .social-website:hover { color: #1a1a2e; }
+  .social-website svg { width: 16px; height: 16px; color: #9ca3af; }
+  .social-icons { display: flex; flex-wrap: wrap; gap: 8px; }
+  .social-icon { width: 36px; height: 36px; border-radius: 8px; border: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: center; color: #9ca3af; text-decoration: none; transition: all 0.2s; font-size: 11px; font-weight: 700; }
+  .social-icon:hover { border-color: #d1d5db; }
+  .social-icon.fb:hover { color: #1877F2; }
+  .social-icon.ig:hover { color: #E4405F; }
+  .social-icon.tw:hover { color: #000; }
+  .social-icon.li:hover { color: #0A66C2; }
+  .social-icon.yt:hover { color: #FF0000; }
+  .social-icon.tt:hover { color: #000; }
+
+  @media (max-width: 1023px) {
+    .hero-top { flex-direction: column; align-items: flex-start; }
+    .avatar { width: 96px; height: 96px; font-size: 32px; }
+    .avatar-wrap { margin-top: -48px; }
+    .hero-name-row h1 { font-size: 24px; }
+    .cover-banner { height: 128px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Back Button Bar -->
+<div class="back-bar">
+  <div class="back-bar-inner">
+    <button class="back-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Back
+    </button>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Hero Card -->
+  <div class="hero-card">
+    <div class="cover-banner"></div>
+    <div class="hero-body">
+      <div class="hero-top">
+        <div class="avatar-wrap">
+          <div class="avatar">
+            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop&crop=face" alt="Sarah Mitchell">
+          </div>
+        </div>
+        <div class="hero-actions">
+          <button class="btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Contact
+          </button>
+          <button class="btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Share
+          </button>
+          <button class="btn-recommend">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+            Recommend
+          </button>
+        </div>
+      </div>
+
+      <div class="hero-info">
+        <div class="hero-name-row">
+          <h1>Sarah Mitchell</h1>
+          <svg class="verified-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <p class="hero-headline">Top-Tier Affiliate Marketer &amp; Brand Strategist</p>
+        <div class="hero-meta">
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Austin, Texas
+          </span>
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Member since March 2024
+          </span>
+          <span class="rating-text">4.9 (42 reviews)</span>
+        </div>
+        <div class="hero-badges">
+          <span class="badge-blue">E-Commerce</span>
+          <span class="badge-blue">SaaS Products</span>
+          <span class="badge-blue">Health &amp; Wellness</span>
+          <span class="badge-blue">Digital Marketing Tools</span>
+          <span class="badge-blue">Personal Finance</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="main-grid">
+    <!-- Content Column -->
+    <div>
+      <!-- About -->
+      <div class="card">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          About
+        </h2>
+        <div class="bio-text" id="bio">
+I'm a performance-driven affiliate marketer with over 8 years of experience helping brands scale their revenue through strategic partnerships and data-driven campaigns. Specializing in e-commerce, SaaS, and health &amp; wellness verticals, I've generated over $4.2M in trackable revenue for my partners.
+
+My approach combines deep audience analysis with creative content strategies across multiple platforms. Whether it's long-form blog reviews, YouTube comparisons, or targeted email sequences, I deliver measurable results that grow your bottom line.</div>
+        <div class="bio-fade" id="bioFade"></div>
+        <button class="show-more-btn" onclick="document.getElementById('bio').classList.toggle('expanded');this.textContent=this.textContent==='Show More'?'Show Less':'Show More';document.getElementById('bioFade').style.display=document.getElementById('bio').classList.contains('expanded')?'none':'block';">Show More</button>
+      </div>
+
+      <!-- Specializations -->
+      <div class="card">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+          Specializations
+        </h2>
+        <div class="flex-wrap-gap">
+          <span class="badge-purple">SEO Content</span>
+          <span class="badge-purple">Video Reviews</span>
+          <span class="badge-purple">Email Marketing</span>
+          <span class="badge-purple">Comparison Content</span>
+          <span class="badge-purple">Landing Pages</span>
+        </div>
+      </div>
+
+      <!-- Affiliate Networks -->
+      <div class="card">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="1" width="22" height="22" rx="5" ry="5"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          Affiliate Networks
+        </h2>
+        <div class="flex-wrap-gap">
+          <span class="badge-green">ShareASale</span>
+          <span class="badge-green">CJ Affiliate</span>
+          <span class="badge-green">Amazon Associates</span>
+          <span class="badge-green">Impact</span>
+          <span class="badge-green">Awin</span>
+        </div>
+      </div>
+
+      <!-- Portfolio -->
+      <div class="card">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          Portfolio <span class="count">(4)</span>
+        </h2>
+        <div class="portfolio-grid">
+          <div class="portfolio-item">
+            <div class="portfolio-brand"><div class="brand-initial">N</div><span>NutraVibe</span></div>
+            <h3>Summer Health Push 2025</h3>
+            <p class="desc">Full-funnel campaign driving supplement sales through SEO blog content, YouTube review series, and targeted email sequences.</p>
+            <div class="portfolio-results">1,850 conversions achieved — exceeded KPI by 40%</div>
+            <div class="portfolio-footer">
+              <div class="meta"><span>12.3% conversion</span><span>Jun 2025</span></div>
+              <a href="#" class="link">View Campaign</a>
+            </div>
+          </div>
+          <div class="portfolio-item">
+            <div class="portfolio-brand"><div class="brand-initial">C</div><span>CloudMetrics Pro</span></div>
+            <h3>SaaS Growth Partnership</h3>
+            <p class="desc">Year-long strategic partnership driving enterprise SaaS signups through in-depth comparison content and B2B webinar collaborations.</p>
+            <div class="portfolio-results">420 enterprise signups — $180K ARR generated</div>
+            <div class="portfolio-footer">
+              <div class="meta"><span>6.8% conversion</span><span>Mar 2025</span></div>
+              <a href="#" class="link">View Campaign</a>
+            </div>
+          </div>
+          <div class="portfolio-item">
+            <div class="portfolio-brand"><div class="brand-initial">F</div><span>FitGear Direct</span></div>
+            <h3>Spring Fitness Blitz</h3>
+            <p class="desc">High-converting seasonal campaign for home fitness equipment featuring video demos, Instagram stories, and affiliate landing pages.</p>
+            <div class="portfolio-results">3,200 units sold — 340% ROAS</div>
+            <div class="portfolio-footer">
+              <div class="meta"><span>9.1% conversion</span><span>Jan 2025</span></div>
+              <a href="#" class="link">View Campaign</a>
+            </div>
+          </div>
+          <div class="portfolio-item">
+            <div class="portfolio-brand"><div class="brand-initial">M</div><span>MoneyWise App</span></div>
+            <h3>Financial Tools Review Series</h3>
+            <p class="desc">Comprehensive review and comparison series for personal finance apps, driving 4,200+ premium signups through authentic content.</p>
+            <div class="portfolio-results">4,200 premium signups — $12.50 CPA</div>
+            <div class="portfolio-footer">
+              <div class="meta"><span>7.5% conversion</span><span>Nov 2024</span></div>
+              <a href="#" class="link">View Campaign</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reviews -->
+      <div class="card">
+        <div class="reviews-header">
+          <h2 style="margin-bottom:0;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Reviews <span class="count">(42)</span>
+          </h2>
+          <button class="write-review-btn">Write a Review</button>
+        </div>
+
+        <div class="rating-summary">
+          <span class="rating-big">4.9</span>
+          <div>
+            <div class="stars-row">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+            </div>
+            <p style="font-size:14px;color:#9ca3af;margin-top:4px;">42 reviews</p>
+          </div>
+        </div>
+
+        <div class="review-item">
+          <div class="review-row">
+            <div class="review-avatar">JR</div>
+            <div class="review-body">
+              <div class="review-name-row">
+                <span class="review-name">James Rodriguez</span>
+                <span class="review-type-badge">SaaS Growth</span>
+              </div>
+              <div class="stars-row">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+              </div>
+              <p class="review-text">Sarah completely transformed our affiliate program. Her content drove a 340% increase in qualified leads within the first 3 months. Highly professional and genuinely invested in our success.</p>
+              <p class="review-date">02/15/2026</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="review-item">
+          <div class="review-row">
+            <div class="review-avatar">LK</div>
+            <div class="review-body">
+              <div class="review-name-row">
+                <span class="review-name">Lisa Kawamura</span>
+                <span class="review-type-badge">E-Commerce Launch</span>
+              </div>
+              <div class="stars-row">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+              </div>
+              <p class="review-text">Working with Sarah was a game-changer for our brand. She understood our products deeply, created authentic content that resonated with her audience, and delivered ROI well above targets.</p>
+              <p class="review-date">01/22/2026</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="review-item">
+          <div class="review-row">
+            <div class="review-avatar">MT</div>
+            <div class="review-body">
+              <div class="review-name-row">
+                <span class="review-name">Marcus Thompson</span>
+                <span class="review-type-badge">Video Content</span>
+              </div>
+              <div class="stars-row">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#e5e7eb" stroke="#e5e7eb"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+              </div>
+              <p class="review-text">Great communication and solid campaign execution. The video content quality was exceptional. Would have loved more frequent reporting updates, but the results speak for themselves.</p>
+              <p class="review-date">12/18/2025</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pagination">
+          <button disabled>Previous</button>
+          <span class="page-info">Page 1 of 9</span>
+          <button>Next</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <!-- Quick Stats -->
+      <div class="sidebar-card">
+        <h3>Quick Stats</h3>
+        <div class="stat-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <div><div class="stat-label">Profile Views</div><div class="stat-value">12,847</div></div>
+        </div>
+        <div class="stat-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          <div><div class="stat-label">Campaigns</div><div class="stat-value">247</div></div>
+        </div>
+        <div class="stat-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <div><div class="stat-label">Businesses Helped</div><div class="stat-value">189</div></div>
+        </div>
+        <div class="stat-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          <div><div class="stat-label">Avg Conversion Rate</div><div class="stat-value">8.4%</div></div>
+        </div>
+        <div class="stat-row">
+          <svg class="star-icon" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <div><div class="stat-label">Rating</div><div class="stat-value">4.9 / 5.0 <span class="sub">(42)</span></div></div>
+        </div>
+      </div>
+
+      <!-- Follow Card -->
+      <div class="subscribe-card">
+        <div class="subscribe-heading">Follow Marketer</div>
+        <p class="subscribe-desc">Follow Sarah Mitchell to get notified about new campaigns and content.</p>
+        <button class="follow-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          Follow Sarah Mitchell
+        </button>
+        <p class="follower-count">127 followers</p>
+      </div>
+
+      <!-- Rate Card -->
+      <div class="sidebar-card">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Rate Card
+        </h3>
+        <div class="rate-row">
+          <div class="rate-label">Commission Rate</div>
+          <div class="rate-value">15% – 35%</div>
+        </div>
+        <div class="rate-row">
+          <div class="rate-label">Flat Fee</div>
+          <div class="rate-value">$500 – $2,500</div>
+        </div>
+      </div>
+
+      <!-- Audience -->
+      <div class="sidebar-card">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Audience
+        </h3>
+        <div class="audience-row" style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #f3f4f6;">
+          <span class="label">Followers</span>
+          <span class="value">850K</span>
+        </div>
+        <div class="audience-row"><span class="label">Age 25-34</span><span class="value">42%</span></div>
+        <div class="audience-row"><span class="label">Age 18-24</span><span class="value">28%</span></div>
+        <div class="audience-row"><span class="label">Female</span><span class="value">62%</span></div>
+        <div class="audience-row"><span class="label">US-based</span><span class="value">71%</span></div>
+      </div>
+
+      <!-- CTA -->
+      <div class="sidebar-card">
+        <button class="cta-btn">Hire This Marketer</button>
+        <p class="cta-count">156 businesses have reached out</p>
+      </div>
+
+      <!-- Social -->
+      <div class="sidebar-card">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Connect
+        </h3>
+        <a href="#" class="social-website">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          sarahmitchell.com
+        </a>
+        <div class="social-icons">
+          <a href="#" class="social-icon yt" title="YouTube">YT</a>
+          <a href="#" class="social-icon ig" title="Instagram">IG</a>
+          <a href="#" class="social-icon tt" title="TikTok">TT</a>
+          <a href="#" class="social-icon tw" title="Twitter/X">X</a>
+          <a href="#" class="social-icon li" title="LinkedIn">LI</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

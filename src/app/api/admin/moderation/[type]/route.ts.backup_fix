@@ -1,0 +1,35 @@
+/**
+ * Admin Moderation API Routes (Dynamic Type)
+ * GET /api/admin/moderation/[type] - Get items for moderation
+ *
+ * @authority PHASE_5.2_BRAIN_PLAN.md - Section 4.2
+ */
+
+import { apiHandler, ApiContext } from '@core/api/apiHandler';
+import { createSuccessResponse } from '@core/api/responseHelpers';
+import { getDatabaseService } from '@core/services/DatabaseService';
+import { BizError } from '@core/errors/BizError';
+
+export const GET = apiHandler(async (context: ApiContext) => {
+  const { user, params } = context;
+
+  if (!user || user.role !== 'admin') {
+    throw BizError.unauthorized('Admin access required');
+  }
+
+  const type = (params as any).type as string;
+  const validTypes = ['listings', 'reviews', 'offers', 'events'];
+
+  if (!validTypes.includes(type)) {
+    throw BizError.badRequest('Invalid moderation type');
+  }
+
+  const db = getDatabaseService();
+
+  // Simplified query - actual implementation would use service methods
+  const tableName = type;
+  const query = `SELECT * FROM ${tableName} ORDER BY created_at DESC LIMIT 100`;
+  const results = await db.query(query);
+
+  return createSuccessResponse({ items: results.rows }, 200);
+});

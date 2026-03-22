@@ -1,0 +1,18 @@
+{
+  "id": "0c7a7ab9-bd18-4b9c-a7e5-4acc2cefc6af",
+  "filename": "taekwondo-hero.jpg.png",
+  "mimeType": "image/png",
+  "size": 2495399,
+  "url": "http://localhost:3000/uploads/site/branding/taekwondo-hero.jpg_0c7a7ab9-bd18-4b9c-a7e5-4acc2cefc6af.png",
+  "thumbnailUrl": "http://localhost:3000/uploads/site/branding/taekwondo-hero.jpg_0c7a7ab9-bd18-4b9c-a7e5-4acc2cefc6af_thumb.webp",
+  "entityType": "site",
+  "entityId": "branding",
+  "createdAt": "2026-03-10T21:12:26.450Z",
+  "updatedAt": "2026-03-10T21:12:26.450Z",
+  "origin": "local",
+  "local": {
+    "path": "public\\uploads\\site\\branding\\taekwondo-hero.jpg_0c7a7ab9-bd18-4b9c-a7e5-4acc2cefc6af.png",
+    "url": "http://localhost:3000/uploads/site/branding/taekwondo-hero.jpg_0c7a7ab9-bd18-4b9c-a7e5-4acc2cefc6af.png",
+    "thumb": "http://localhost:3000/uploads/site/branding/taekwondo-hero.jpg_0c7a7ab9-bd18-4b9c-a7e5-4acc2cefc6af_thumb.webp"
+  }
+}

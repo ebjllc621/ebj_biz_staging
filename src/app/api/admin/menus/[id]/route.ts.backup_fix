@@ -1,0 +1,55 @@
+/**
+ * Admin Menu Item API Routes
+ * GET /api/admin/menus/[id] - Get menu item by ID
+ * PATCH /api/admin/menus/[id] - Update menu item
+ * DELETE /api/admin/menus/[id] - Delete menu item
+ *
+ * @authority PHASE_5.2_BRAIN_PLAN.md - Section 4.4
+ */
+
+import { apiHandler, ApiContext } from '@core/api/apiHandler';
+import { createSuccessResponse } from '@core/api/responseHelpers';
+import { MenuService } from '@core/services/MenuService';
+import { BizError } from '@core/errors/BizError';
+
+export const GET = apiHandler(async (context: ApiContext) => {
+  const { user, params } = context;
+
+  if (!user || user.role !== 'admin') {
+    throw BizError.unauthorized('Admin access required');
+  }
+
+  const id = parseInt((params as any).id);
+  const menuService = new MenuService();
+  const item = await menuService.getMenuItemById(id);
+
+  return createSuccessResponse({ item }, 200);
+});
+
+export const PATCH = apiHandler(async (context: ApiContext) => {
+  const { user, params, body } = context;
+
+  if (!user || user.role !== 'admin') {
+    throw BizError.unauthorized('Admin access required');
+  }
+
+  const id = parseInt((params as any).id);
+  const menuService = new MenuService();
+  const item = await menuService.updateMenuItem(id, body as any);
+
+  return createSuccessResponse({ item }, 200);
+});
+
+export const DELETE = apiHandler(async (context: ApiContext) => {
+  const { user, params } = context;
+
+  if (!user || user.role !== 'admin') {
+    throw BizError.unauthorized('Admin access required');
+  }
+
+  const id = parseInt((params as any).id);
+  const menuService = new MenuService();
+  await menuService.deleteMenuItem(id);
+
+  return createSuccessResponse({ success: true }, 200);
+});

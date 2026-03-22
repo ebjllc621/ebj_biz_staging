@@ -1,0 +1,438 @@
+/**
+ * apiHandler - Next.js API Route Wrapper
+ *
+ * Standardized wrapper for Next.js API routes providing:
+ * - Error handling and transformation
+ * - Request/response logging
+ * - Authentication integration
+ * - CORS handling
+ * - Rate limiting hooks
+ * - Response formatting
+ *
+ * Build Map v2.1 ENHANCED compliance: API standardization
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { BizError } from '../errors/BizError';
+import { logger, LogContext, Logger } from '../logging/Logger';
+import { rbacService, RbacAction, RbacResource, RbacPrincipal, createPrincipal, isRbacRole } from '../../lib/rbac';
+
+export interface ApiHandlerConfig {
+  requireAuth?: boolean;
+  allowedMethods?: string[];
+  corsOrigins?: string[];
+  rateLimit?: {
+    requests: number;
+    windowMs: number;
+  };
+  timeout?: number;
+  // RBAC authorization (optional, backward compatible)
+  rbac?: {
+    action: RbacAction;
+    resource: RbacResource;
+  };
+}
+
+export interface ApiContext {
+  request: NextRequest;
+  requestId: string;
+  userId?: string;
+  metadata: Record<string, unknown>;
+  // RBAC principal (optional, backward compatible)
+  principal?: RbacPrincipal;
+  // Request-specific logger
+  logger: Logger;
+}
+
+export interface ApiResponse<T = unknown> {
+  success: boolean;
+  data?: T;
+  error?: {
+    code: string;
+    message: string;
+    details?: Record<string, unknown>;
+  };
+  meta?: {
+    requestId: string;
+    timestamp: Date;
+    version: string;
+  };
+}
+
+export type ApiHandler<T = unknown> = (
+  context: ApiContext
+) => Promise<ApiResponse<T>>;
+
+/**
+ * Create standardized API handler wrapper
+ */
+export function apiHandler<T = unknown>(
+  handler: ApiHandler<T>,
+  config: ApiHandlerConfig = {}
+) {
+  return async (request: NextRequest): Promise<NextResponse> => {
+    const requestId = generateRequestId();
+    const startTime = Date.now();
+
+    // Create logging context
+    const logContext: LogContext = {
+      service: 'ApiHandler',
+      operation: 'handleRequest',
+      requestId,
+      metadata: {
+        method: request.method,
+        url: request.url,
+        userAgent: request.headers.get('user-agent')
+      }
+    };
+
+    const requestLogger = logger.child(logContext);
+
+    try {
+      requestLogger.info('API request started');
+
+      // Method validation
+      if (config.allowedMethods && !config.allowedMethods.includes(request.method)) {
+        throw new BizError({
+          code: 'METHOD_NOT_ALLOWED',
+          message: `Method ${request.method} not allowed`,
+          context: { allowedMethods: config.allowedMethods }
+        });
+      }
+
+      // CORS handling
+      const corsHeaders = handleCors(request, config.corsOrigins);
+
+      // Authentication check (stub)
+      let userId: string | undefined;
+      let principal: RbacPrincipal | undefined;
+
+      if (config.requireAuth) {
+        const authResult = await authenticateRequest(request);
+        userId = authResult ?? undefined;
+        if (!userId) {
+          throw BizError.accessDenied('Access token required');
+        }
+
+        // Create RBAC principal from session (stub implementation)
+        const sessionData = await getSessionData(request);
+        if (sessionData?.role && isRbacRole(sessionData.role)) {
+          principal = createPrincipal(userId, sessionData.role, sessionData.isVerified);
+        }
+      }
+
+      // RBAC authorization check (optional, backward compatible)
+      if (config.rbac && principal) {
+        const { action, resource } = config.rbac;
+        const authResult = rbacService.authorize(principal, action, resource);
+
+        if (!authResult.allowed) {
+          requestLogger.warn('RBAC authorization denied', {
+            metadata: {
+              userId: principal.userId,
+              role: principal.role,
+              action,
+              resource,
+              reason: authResult.reason
+            }
+          });
+
+          throw BizError.accessDenied(`Access denied: ${authResult.reason}`);
+        }
+
+        requestLogger.debug('RBAC authorization granted', {
+          metadata: {
+            userId: principal.userId,
+            role: principal.role,
+            action,
+            resource,
+            policy: authResult.policy
+          }
+        });
+      }
+
+      // Rate limiting (stub)
+      if (config.rateLimit) {
+        await checkRateLimit(request, config.rateLimit, requestId);
+      }
+
+      // Create API context
+      const context: ApiContext = {
+        request,
+        requestId,
+        userId,
+        principal,
+        metadata: {
+          startTime,
+          method: request.method,
+          url: request.url
+        },
+        logger: requestLogger
+      };
+
+      // Execute handler with timeout
+      const timeoutMs = config.timeout || 30000;
+      const result = await executeWithTimeout(
+        () => handler(context),
+        timeoutMs
+      );
+
+      const duration = Date.now() - startTime;
+
+      requestLogger.info('API request completed', {
+        metadata: {
+          success: result.success,
+          durationMs: duration,
+          hasData: !!result.data
+        }
+      });
+
+      // Create successful response
+      const response = createSuccessResponse(result, requestId);
+      return NextResponse.json(response, {
+        status: 200,
+        headers: corsHeaders
+      });
+
+    } catch (error) {
+      const duration = Date.now() - startTime;
+
+      // Handle and log error
+      const bizError = error instanceof BizError
+        ? error
+        : new BizError({
+            code: 'INTERNAL_ERROR',
+            message: error instanceof Error ? error.message : 'Unknown error occurred',
+            cause: error instanceof Error ? error : undefined
+          });
+
+      requestLogger.error('API request failed', bizError, {
+        metadata: { durationMs: duration }
+      });
+
+      // Create error response
+      const response = createErrorResponse(bizError, requestId);
+      const status = getErrorStatus(bizError);
+
+      return NextResponse.json(response, {
+        status,
+        headers: handleCors(request, config.corsOrigins)
+      });
+    }
+  };
+}
+
+/**
+ * Create standardized success response
+ */
+export function createSuccessResponse<T>(
+  result: ApiResponse<T> | T,
+  requestId: string
+): ApiResponse<T> {
+  // If already formatted as ApiResponse, enhance with meta
+  if (typeof result === 'object' && result !== null && 'success' in result) {
+    return {
+      ...result as ApiResponse<T>,
+      meta: {
+        requestId,
+        timestamp: new Date(),
+        version: '5.0.0'
+      }
+    };
+  }
+
+  // Format raw data as ApiResponse
+  return {
+    success: true,
+    data: result as T,
+    meta: {
+      requestId,
+      timestamp: new Date(),
+      version: '5.0.0'
+    }
+  };
+}
+
+/**
+ * Create standardized error response
+ */
+export function createErrorResponse(
+  error: BizError,
+  requestId: string
+): ApiResponse<never> {
+  return {
+    success: false,
+    error: {
+      code: error.code,
+      message: error.userMessage || error.message,
+      details: error.context
+    },
+    meta: {
+      requestId,
+      timestamp: new Date(),
+      version: '5.0.0'
+    }
+  };
+}
+
+/**
+ * Handle CORS headers
+ */
+function handleCors(
+  request: NextRequest,
+  allowedOrigins?: string[]
+): Record<string, string> {
+  const origin = request.headers.get('origin');
+  const headers: Record<string, string> = {
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Max-Age': '86400'
+  };
+
+  if (allowedOrigins && origin && allowedOrigins.includes(origin)) {
+    headers['Access-Control-Allow-Origin'] = origin;
+    headers['Access-Control-Allow-Credentials'] = 'true';
+  } else if (!allowedOrigins) {
+    headers['Access-Control-Allow-Origin'] = '*';
+  }
+
+  return headers;
+}
+
+/**
+ * Authenticate request (stub implementation)
+ */
+async function authenticateRequest(request: NextRequest): Promise<string | null> {
+  // STUB: Real implementation would validate JWT/session
+  const authHeader = request.headers.get('authorization');
+  const sessionCookie = request.cookies.get('session');
+
+  logger.debug('Authentication check (STUB)', {
+    metadata: {
+      hasAuthHeader: !!authHeader,
+      hasSessionCookie: !!sessionCookie
+    }
+  });
+
+  // STUB: Return null for unauthenticated, userId for authenticated
+  return authHeader || sessionCookie ? 'stub-user-id' : null;
+}
+
+/**
+ * Get session data for RBAC (stub implementation)
+ */
+async function getSessionData(request: NextRequest): Promise<{ role: string; isVerified: boolean } | null> {
+  // STUB: Real implementation would extract from validated session
+  const sessionCookie = request.cookies.get('session');
+  const authHeader = request.headers.get('authorization');
+
+  if (!sessionCookie && !authHeader) {
+    return null;
+  }
+
+  logger.debug('Session data check (STUB)', {
+    metadata: {
+      hasSessionCookie: !!sessionCookie,
+      hasAuthHeader: !!authHeader
+    }
+  });
+
+  // STUB: Mock session data for testing
+  // Real implementation would decrypt/validate session and return actual user data
+  return {
+    role: 'user', // or 'admin' based on actual session
+    isVerified: true
+  };
+}
+
+/**
+ * Check rate limit (stub implementation)
+ */
+async function checkRateLimit(
+  request: NextRequest,
+  rateLimit: { requests: number; windowMs: number },
+  requestId: string
+): Promise<void> {
+  // STUB: Real implementation would check Redis/memory store
+  const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
+
+  logger.debug('Rate limit check (STUB)', {
+    metadata: {
+      clientIp,
+      limit: rateLimit.requests,
+      windowMs: rateLimit.windowMs,
+      requestId
+    }
+  });
+
+  // STUB: Always allow for now
+}
+
+/**
+ * Execute operation with timeout
+ */
+async function executeWithTimeout<T>(
+  operation: () => Promise<T>,
+  timeoutMs: number
+): Promise<T> {
+  return Promise.race([
+    operation(),
+    new Promise<never>((_, reject: any) =>
+      setTimeout(() => reject(new BizError({
+        code: 'REQUEST_TIMEOUT',
+        message: `Request timed out after ${timeoutMs}ms`
+      })), timeoutMs)
+    )
+  ]);
+}
+
+/**
+ * Map BizError to HTTP status code
+ */
+function getErrorStatus(error: BizError): number {
+  const statusMap: Record<string, number> = {
+    'VALIDATION_ERROR': 400,
+    'NOT_FOUND': 404,
+    'ACCESS_DENIED': 401,
+    'METHOD_NOT_ALLOWED': 405,
+    'REQUEST_TIMEOUT': 408,
+    'RATE_LIMIT_EXCEEDED': 429,
+    'SERVICE_UNAVAILABLE': 503
+  };
+
+  return statusMap[error.code] || 500;
+}
+
+/**
+ * Generate unique request ID
+ */
+function generateRequestId(): string {
+  return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+}
+
+/**
+ * Helper function to create RBAC-enabled API handler
+ *
+ * @param handler - API handler function
+ * @param action - RBAC action required
+ * @param resource - RBAC resource being accessed
+ * @param config - Additional API handler configuration
+ * @returns Configured API handler with RBAC
+ */
+export function rbacApiHandler<T = unknown>(
+  handler: ApiHandler<T>,
+  action: RbacAction,
+  resource: RbacResource,
+  config: Omit<ApiHandlerConfig, 'rbac'> = {}
+) {
+  return apiHandler(handler, {
+    ...config,
+    requireAuth: true, // RBAC requires authentication
+    rbac: { action, resource }
+  });
+}
+
+/**
+ * Re-export RBAC types for convenience
+ */
+export type { RbacAction, RbacResource, RbacPrincipal } from '../../lib/rbac';

@@ -1,0 +1,137 @@
+/**
+ * Account Status Pages Styles
+ *
+ * Professional styling for suspended and deleted account pages
+ * Matches Bizconekt brand identity (Navy #002641, Orange #ed6437)
+ *
+ * @see docs/dna/brain-plans/ACCOUNT_STATUS_PAGES_BRAIN_PLAN.md
+ */
+
+/* Page Container - Navy to Orange gradient matching homepage Final CTA */
+.account-status-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(to right, #002641, #ed6437);
+}
+
+/* Header with Gradient - Orange to Navy (left to right), transitions to navy at 40% */
+.account-status-header {
+  background: linear-gradient(135deg, #ed6437 0%, #002641 40%);
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.account-status-header a {
+  display: inline-block;
+  transition: opacity 0.2s;
+}
+
+.account-status-header a:hover {
+  opacity: 0.9;
+}
+
+/* Main Content Area */
+.account-status-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+/* Status Card */
+.account-status-card {
+  max-width: 32rem;
+  width: 100%;
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  padding: 2.5rem;
+  text-align: center;
+}
+
+/* Reason Box (Suspended Accounts) */
+.account-status-reason {
+  background-color: #fef3cd;
+  border: 1px solid #ffc107;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin: 1.5rem 0;
+  text-align: left;
+}
+
+.account-status-reason strong {
+  font-weight: 600;
+}
+
+/* Call-to-Action Buttons */
+.account-status-cta {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.account-status-cta a {
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* Footer */
+.account-status-footer {
+  background-color: #1a1f2e;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  color: #f3f4f6;
+}
+
+/* Legal Links */
+.account-status-legal-links {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.account-status-legal-links a {
+  color: #f97316;
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: color 0.2s;
+}
+
+.account-status-legal-links a:hover {
+  color: #ea580c;
+  text-decoration: underline;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 640px) {
+  .account-status-header {
+    padding: 0.75rem 1rem;
+  }
+
+  .account-status-card {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+
+  .account-status-cta {
+    flex-direction: column;
+  }
+
+  .account-status-cta a {
+    width: 100%;
+  }
+
+  .account-status-legal-links {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+/* Dark Mode Support - Disabled for account status pages per design spec */
+/* Body background stays #fefefe regardless of color scheme */

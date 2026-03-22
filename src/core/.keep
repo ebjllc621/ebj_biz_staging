@@ -1,0 +1,28 @@
+# Core Module Directory
+#
+# This directory contains the core business logic and services layer.
+#
+# Build Map v2.1 ENHANCED compliance:
+# - All services extend CoreService abstract base
+# - Structured error handling with BizError
+# - Contextual logging with Logger interface
+# - MariaDB 10.11 database operations
+# - API standardization with apiHandler wrapper
+#
+# Architecture boundaries:
+# - Core can import: Standard libraries, Next.js framework
+# - Core cannot import: app, components, features, lib layers
+# - All errors must use BizError class
+# - Services must follow CoreService pattern
+#
+# Subdirectories:
+# - services/     - Business logic services (DatabaseService, ApiService, etc.)
+# - errors/       - Error handling classes (BizError)
+# - logging/      - Logging interfaces and implementations
+# - types/        - Type definitions and interfaces
+# - api/          - API utilities and handlers (apiHandler)
+# - utils/        - Core utility functions
+# - hooks/        - Core React hooks
+# - config/       - Configuration management
+#
+# BUILD_V5.0 P1 Service Foundation implemented ✓

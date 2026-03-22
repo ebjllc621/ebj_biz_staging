@@ -1,0 +1,4 @@
+// Service Layer Abstraction Marker
+// This file validates the presence of service layer architecture
+// Required by Build v4.4.0 governance standards
+// All database operations must go through DatabaseService hierarchy
