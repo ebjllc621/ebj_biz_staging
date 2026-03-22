@@ -38,7 +38,7 @@ export const GET = apiHandler(async (context) => {
   // Verify ownership or admin access
   const db = getDatabaseService();
   const listingResult = await db.query(
-    'SELECT claimant_user_id FROM listings WHERE id = ?',
+    'SELECT user_id FROM listings WHERE id = ?',
     [listingId]
   );
 
@@ -46,8 +46,8 @@ export const GET = apiHandler(async (context) => {
     return createErrorResponse('Listing not found', 404);
   }
 
-  const listing = listingResult.rows[0] as { claimant_user_id: number | null };
-  const isOwner = listing?.claimant_user_id === user.id;
+  const listing = listingResult.rows[0] as { user_id: number | null };
+  const isOwner = listing?.user_id === user.id;
   const isAdmin = user.role === 'admin';
 
   if (!isOwner && !isAdmin) {
@@ -87,7 +87,7 @@ export const POST = apiHandler(async (context) => {
   // Verify ownership
   const db = getDatabaseService();
   const listingResult = await db.query(
-    'SELECT claimant_user_id FROM listings WHERE id = ?',
+    'SELECT user_id FROM listings WHERE id = ?',
     [listingId]
   );
 
@@ -95,8 +95,8 @@ export const POST = apiHandler(async (context) => {
     return createErrorResponse('Listing not found', 404);
   }
 
-  const listing = listingResult.rows[0] as { claimant_user_id: number | null };
-  const isOwner = listing?.claimant_user_id === user.id;
+  const listing = listingResult.rows[0] as { user_id: number | null };
+  const isOwner = listing?.user_id === user.id;
   const isAdmin = user.role === 'admin';
 
   if (!isOwner && !isAdmin) {

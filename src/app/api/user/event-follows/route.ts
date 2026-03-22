@@ -117,7 +117,7 @@ export const GET = apiHandler(async (context) => {
   }>(
     `SELECT ef.id, ef.follow_type, ef.target_id, ef.notification_frequency, ef.created_at,
        CASE
-         WHEN ef.follow_type = 'business' THEN l.business_name
+         WHEN ef.follow_type = 'business' THEN l.name
          WHEN ef.follow_type = 'category' THEN et.name
          ELSE 'All Events'
        END AS target_name

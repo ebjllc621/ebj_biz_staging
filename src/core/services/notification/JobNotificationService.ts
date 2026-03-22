@@ -199,12 +199,12 @@ export class JobNotificationService {
       // Get business name if associated with a listing
       let businessName = 'A business';
       if (job.business_id) {
-        const listingResult = await this.db.query<{ business_name: string }>(
-          'SELECT business_name FROM listings WHERE id = ?',
+        const listingResult = await this.db.query<{ name: string }>(
+          'SELECT name FROM listings WHERE id = ?',
           [job.business_id]
         );
         if (listingResult.rows[0]) {
-          businessName = listingResult.rows[0].business_name;
+          businessName = listingResult.rows[0].name;
         }
       }
 
@@ -419,8 +419,8 @@ export class JobNotificationService {
 
       const job = jobResult.rows[0];
 
-      const listingResult = await this.db.query<{ business_name: string }>(
-        'SELECT business_name FROM listings WHERE id = ?',
+      const listingResult = await this.db.query<{ name: string }>(
+        'SELECT name FROM listings WHERE id = ?',
         [listingId]
       );
 
@@ -448,7 +448,7 @@ export class JobNotificationService {
           type: 'job.published',
           recipientId: row.user_id,
           title: 'New Job Posted',
-          message: `${listing.business_name} posted a new job: ${job.title}`,
+          message: `${listing.name} posted a new job: ${job.title}`,
           entityType: 'job',
           entityId: jobId,
           actionUrl,
@@ -456,7 +456,7 @@ export class JobNotificationService {
           metadata: {
             job_id: jobId,
             listing_id: listingId,
-            business_name: listing.business_name
+            business_name: listing.name
           }
         })
       );

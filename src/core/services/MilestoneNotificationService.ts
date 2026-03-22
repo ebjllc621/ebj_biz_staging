@@ -115,20 +115,20 @@ export class MilestoneNotificationService {
     try {
       // Get listing owner for notification dispatch
       const listingResult = await this.db.query<{
-        claimant_user_id: number | null;
-        business_name: string;
+        user_id: number | null;
+        name: string;
       }>(
-        'SELECT claimant_user_id, business_name FROM listings WHERE id = ?',
+        'SELECT user_id, name FROM listings WHERE id = ?',
         [listingId]
       );
 
       if (listingResult.rows.length === 0) return [];
       const listing = listingResult.rows[0];
-      if (!listing?.claimant_user_id) return [];
+      if (!listing?.user_id) return [];
 
       // Query totals for each milestone type
       const viewsResult = await this.db.query<{ total: number | bigint }>(
-        'SELECT COUNT(*) as total FROM analytics_page_views WHERE listing_id = ?',
+        'SELECT COUNT(*) as total FROM analytics_listing_views WHERE listing_id = ?',
         [listingId]
       );
       const reviewsResult = await this.db.query<{ total: number | bigint }>(
@@ -188,8 +188,8 @@ export class MilestoneNotificationService {
 
                 await this.notificationService.dispatch({
                   type: 'listing.milestone_achieved',
-                  recipientId: listing.claimant_user_id,
-                  title: `Milestone: ${listing.business_name}`,
+                  recipientId: listing.user_id,
+                  title: `Milestone: ${listing.name}`,
                   message,
                   entityType: 'listing',
                   entityId: listingId,

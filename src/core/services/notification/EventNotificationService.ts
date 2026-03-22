@@ -204,9 +204,9 @@ export class EventNotificationService {
 
       // Get listing details
       const listingResult = await this.db.query<{
-        business_name: string;
+        name: string;
       }>(
-        'SELECT business_name FROM listings WHERE id = ?',
+        'SELECT name FROM listings WHERE id = ?',
         [listingId]
       );
 
@@ -277,7 +277,7 @@ export class EventNotificationService {
       }
 
       const actionUrl = `/events/${event.slug || event.id}`;
-      const message = `${listing.business_name} published a new event${event.venue_name ? ' at ' + event.venue_name : ''}`;
+      const message = `${listing.name} published a new event${event.venue_name ? ' at ' + event.venue_name : ''}`;
 
       const dispatchPromises = allFollowers.map(row =>
         this.notificationService.dispatch({

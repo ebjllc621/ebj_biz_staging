@@ -74,10 +74,10 @@ export class FollowerBroadcastService {
       // Get listing details
       const listingResult = await this.db.query<{
         id: number;
-        business_name: string;
+        name: string;
         slug: string;
       }>(
-        'SELECT id, business_name, slug FROM listings WHERE id = ?',
+        'SELECT id, name, slug FROM listings WHERE id = ?',
         [listingId]
       );
 
@@ -105,7 +105,7 @@ export class FollowerBroadcastService {
         this.notificationService.dispatch({
           type: 'listing.updated',
           recipientId: follower.user_id,
-          title: `${listing.business_name} has been updated`,
+          title: `${listing.name} has been updated`,
           message: `${updateType} — check out what's new`,
           entityType: 'listing',
           entityId: listing.id,
@@ -143,10 +143,10 @@ export class FollowerBroadcastService {
       // Get listing details
       const listingResult = await this.db.query<{
         id: number;
-        business_name: string;
+        name: string;
         slug: string;
       }>(
-        'SELECT id, business_name, slug FROM listings WHERE id = ?',
+        'SELECT id, name, slug FROM listings WHERE id = ?',
         [listingId]
       );
 
@@ -183,7 +183,7 @@ export class FollowerBroadcastService {
           type: 'listing.new_in_category',
           recipientId: subscriber.user_id,
           title: `New listing in ${categoryName}`,
-          message: `${listing.business_name} just joined ${categoryName}`,
+          message: `${listing.name} just joined ${categoryName}`,
           entityType: 'listing',
           entityId: listing.id,
           actionUrl,
@@ -228,9 +228,9 @@ export class FollowerBroadcastService {
       // Get listing details
       const listingResult = await this.db.query<{
         id: number;
-        business_name: string;
+        name: string;
       }>(
-        'SELECT id, business_name FROM listings WHERE id = ?',
+        'SELECT id, name FROM listings WHERE id = ?',
         [listingId]
       );
 
@@ -263,7 +263,7 @@ export class FollowerBroadcastService {
           priority: 'normal',
           metadata: {
             listing_id: listingId,
-            business_name: listing.business_name
+            business_name: listing.name
           }
         })
       );

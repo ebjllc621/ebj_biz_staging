@@ -62,12 +62,12 @@ export class ShareReminderService {
       // Get listing details — verify ownership
       const listingResult = await this.db.query<{
         id: number;
-        business_name: string;
+        name: string;
         created_at: Date;
-        claimant_user_id: number | null;
+        user_id: number | null;
         status: string;
       }>(
-        'SELECT id, business_name, created_at, claimant_user_id, status FROM listings WHERE id = ? AND claimant_user_id = ?',
+        'SELECT id, name, created_at, user_id, status FROM listings WHERE id = ? AND user_id = ?',
         [listingId, ownerId]
       );
 
@@ -90,7 +90,7 @@ export class ShareReminderService {
 
       // Check page views
       const viewsResult = await this.db.query<{ total: number | bigint }>(
-        'SELECT COUNT(*) as total FROM analytics_page_views WHERE listing_id = ?',
+        'SELECT COUNT(*) as total FROM analytics_listing_views WHERE listing_id = ?',
         [listingId]
       );
       const viewCount = bigIntToNumber(viewsResult.rows[0]?.total ?? 0);
@@ -98,7 +98,7 @@ export class ShareReminderService {
 
       return {
         listingId,
-        listingName: listing.business_name,
+        listingName: listing.name,
         pageViews: viewCount,
         publishedAt,
         message: `Your listing has ${viewCount} view${viewCount === 1 ? '' : 's'} — share on social media to reach even more customers!`
@@ -115,7 +115,7 @@ export class ShareReminderService {
   async getPerformanceNudge(listingId: number): Promise<PerformanceNudge | null> {
     try {
       const viewsResult = await this.db.query<{ total: number | bigint }>(
-        'SELECT COUNT(*) as total FROM analytics_page_views WHERE listing_id = ?',
+        'SELECT COUNT(*) as total FROM analytics_listing_views WHERE listing_id = ?',
         [listingId]
       );
       const sharesResult = await this.db.query<{ total: number | bigint }>(

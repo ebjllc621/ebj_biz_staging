@@ -265,8 +265,8 @@ export class ContentNotificationService {
       const content = contentResult.rows[0];
 
       // Get listing name
-      const listingResult = await this.db.query<{ business_name: string }>(
-        'SELECT business_name FROM listings WHERE id = ? LIMIT 1',
+      const listingResult = await this.db.query<{ name: string }>(
+        'SELECT name FROM listings WHERE id = ? LIMIT 1',
         [listingId]
       );
 
@@ -299,8 +299,8 @@ export class ContentNotificationService {
         this.notificationService.dispatch({
           type: notificationType,
           recipientId: row.user_id,
-          title: `New ${contentType} from ${listing.business_name}`,
-          message: `${listing.business_name} published: "${content.title}"`,
+          title: `New ${contentType} from ${listing.name}`,
+          message: `${listing.name} published: "${content.title}"`,
           entityType: 'content',
           entityId: content.id,
           actionUrl,
@@ -346,8 +346,8 @@ export class ContentNotificationService {
       }
 
       // Get listing name
-      const listingResult = await this.db.query<{ business_name: string }>(
-        'SELECT business_name FROM listings WHERE id = ? LIMIT 1',
+      const listingResult = await this.db.query<{ name: string }>(
+        'SELECT name FROM listings WHERE id = ? LIMIT 1',
         [listingId]
       );
       if (!listingResult.rows.length || !listingResult.rows[0]) {
@@ -364,7 +364,7 @@ export class ContentNotificationService {
       if (!usersResult.rows.length) return;
 
       const title = contentResult.rows[0].title;
-      const listingName = listingResult.rows[0].business_name;
+      const listingName = listingResult.rows[0].name;
 
       // Dispatch to each user with progress
       const dispatchPromises = usersResult.rows.map(row =>

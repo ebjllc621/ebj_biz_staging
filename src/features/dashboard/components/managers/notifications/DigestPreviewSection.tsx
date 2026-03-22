@@ -133,7 +133,7 @@ export function DigestPreviewSection({ userId: _userId }: DigestPreviewSectionPr
                                text-sm hover:bg-gray-100 transition-colors group"
                   >
                     <span className="text-gray-900 group-hover:text-[#ed6437] transition-colors truncate">
-                      {listing.business_name}
+                      {listing.name}
                     </span>
                     <ExternalLink className="w-3 h-3 text-gray-400 flex-shrink-0 ml-2" />
                   </Link>

@@ -276,7 +276,7 @@ export class ModerationNotificationService {
       listing_slug: string | null;
     }>(
       `SELECT r.user_id, r.title, r.listing_id,
-              l.business_name AS listing_name, l.slug AS listing_slug
+              l.name AS listing_name, l.slug AS listing_slug
        FROM reviews r
        JOIN listings l ON l.id = r.listing_id
        WHERE r.id = ? LIMIT 1`,

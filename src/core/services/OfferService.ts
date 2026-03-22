@@ -3191,19 +3191,19 @@ export class OfferService {
 
       if (offerResult.rows.length > 0 && offerResult.rows[0]) {
         const offer = offerResult.rows[0];
-        const listingResult = await this.db.query<{ claimant_user_id: number | null }>(
-          'SELECT claimant_user_id FROM listings WHERE id = ?',
+        const listingResult = await this.db.query<{ user_id: number | null }>(
+          'SELECT user_id FROM listings WHERE id = ?',
           [offer.listing_id]
         );
 
-        if (listingResult.rows.length > 0 && listingResult.rows[0]?.claimant_user_id) {
+        if (listingResult.rows.length > 0 && listingResult.rows[0]?.user_id) {
           const { getNotificationService } = await import('@core/services/ServiceRegistry');
           const notificationService = getNotificationService();
           const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://bizconekt.com';
 
           await notificationService.dispatch({
             type: 'offer.dispute_opened',
-            recipientId: listingResult.rows[0].claimant_user_id,
+            recipientId: listingResult.rows[0].user_id,
             title: `Dispute opened: ${offer.title}`,
             message: `A customer reported an issue with redemption: ${reason}`,
             entityType: 'offer',

@@ -92,10 +92,10 @@ export class OfferNotificationService {
 
       // Get listing details
       const listingResult = await this.db.query<{
-        business_name: string;
+        name: string;
         category_id: number | null;
       }>(
-        'SELECT business_name, category_id FROM listings WHERE id = ?',
+        'SELECT name, category_id FROM listings WHERE id = ?',
         [listingId]
       );
 
@@ -134,7 +134,7 @@ export class OfferNotificationService {
         this.notificationService.dispatch({
           type: 'offer.published',
           recipientId: row.user_id,
-          title: `New offer from ${listing.business_name}`,
+          title: `New offer from ${listing.name}`,
           message: `${offer.title} - ${savingsText}`,
           entityType: 'offer',
           entityId: offer.id,
@@ -212,10 +212,10 @@ export class OfferNotificationService {
 
       // Get listing details
       const listingResult = await this.db.query<{
-        business_name: string;
-        claimant_user_id: number | null;
+        name: string;
+        user_id: number | null;
       }>(
-        'SELECT business_name, claimant_user_id FROM listings WHERE id = ?',
+        'SELECT name, user_id FROM listings WHERE id = ?',
         [offer.listing_id]
       );
 
@@ -249,10 +249,10 @@ export class OfferNotificationService {
       });
 
       // 2. Send alert to business owner (if claimed)
-      if (listing.claimant_user_id) {
+      if (listing.user_id) {
         await this.notificationService.dispatch({
           type: 'offer.claim_received',
-          recipientId: listing.claimant_user_id,
+          recipientId: listing.user_id,
           title: `New offer claim: ${offer.title}`,
           message: `A user claimed your offer`,
           entityType: 'offer',
@@ -438,10 +438,10 @@ export class OfferNotificationService {
 
       // Get listing details
       const listingResult = await this.db.query<{
-        business_name: string;
-        claimant_user_id: number | null;
+        name: string;
+        user_id: number | null;
       }>(
-        'SELECT business_name, claimant_user_id FROM listings WHERE id = ?',
+        'SELECT name, user_id FROM listings WHERE id = ?',
         [offer.listing_id]
       );
 
@@ -470,7 +470,7 @@ export class OfferNotificationService {
         type: 'offer.redeemed',
         recipientId: userId,
         title: `Offer redeemed: ${offer.title}`,
-        message: `Your offer at ${listing.business_name} has been successfully redeemed via ${methodLabel}.`,
+        message: `Your offer at ${listing.name} has been successfully redeemed via ${methodLabel}.`,
         entityType: 'offer',
         entityId: offerId,
         actionUrl: `${baseUrl}/dashboard/my-offers`,
@@ -483,10 +483,10 @@ export class OfferNotificationService {
       });
 
       // 2. Notify business owner (if listing is claimed)
-      if (listing.claimant_user_id) {
+      if (listing.user_id) {
         await this.notificationService.dispatch({
           type: 'offer.redemption_complete',
-          recipientId: listing.claimant_user_id,
+          recipientId: listing.user_id,
           title: `Redemption completed: ${offer.title}`,
           message: `A customer redeemed their offer via ${methodLabel}`,
           entityType: 'offer',
@@ -524,19 +524,19 @@ export class OfferNotificationService {
     try {
       // Get listing owner
       const listingResult = await this.db.query<{
-        claimant_user_id: number | null;
-        business_name: string;
+        user_id: number | null;
+        name: string;
       }>(
-        'SELECT claimant_user_id, business_name FROM listings WHERE id = ?',
+        'SELECT user_id, name FROM listings WHERE id = ?',
         [listingId]
       );
 
-      if (listingResult.rows.length === 0 || !listingResult.rows[0]?.claimant_user_id) {
+      if (listingResult.rows.length === 0 || !listingResult.rows[0]?.user_id) {
         return { success: false, error: 'Listing owner not found' };
       }
 
       const listing = listingResult.rows[0];
-      const ownerId = listing.claimant_user_id as number; // Already validated above
+      const ownerId = listing.user_id as number; // Already validated above
 
       // Get offer title
       const offerResult = await this.db.query<{ title: string; slug: string }>(

@@ -122,11 +122,11 @@ export const POST = withCsrf(apiHandler(async (context: ApiContext) => {
   }
 
   // Get listing name for email template
-  const listingResult = await db.query<{ business_name: string }>(
-    'SELECT business_name FROM listings WHERE id = ? LIMIT 1',
+  const listingResult = await db.query<{ name: string }>(
+    'SELECT name FROM listings WHERE id = ? LIMIT 1',
     [listingId]
   );
-  const listingName = listingResult.rows[0]?.business_name || 'Business';
+  const listingName = listingResult.rows[0]?.name || 'Business';
 
   // Send newsletter (marks as published, returns subscribers)
   const newsletterService = new NewsletterService(db);

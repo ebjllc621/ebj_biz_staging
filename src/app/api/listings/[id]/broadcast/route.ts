@@ -47,11 +47,11 @@ export const POST = apiHandler(async (context) => {
   // Verify ownership: user must be the listing claimant or an admin
   const db = getDatabaseService();
   const listingResult = await db.query<{
-    claimant_user_id: number | null;
-    business_name: string;
+    user_id: number | null;
+    name: string;
     slug: string;
   }>(
-    'SELECT claimant_user_id, business_name, slug FROM listings WHERE id = ?',
+    'SELECT user_id, name, slug FROM listings WHERE id = ?',
     [listingId]
   );
 
@@ -70,7 +70,7 @@ export const POST = apiHandler(async (context) => {
     );
   }
 
-  const isOwner = listing.claimant_user_id === user.id;
+  const isOwner = listing.user_id === user.id;
   const isAdmin = user.role === 'admin';
 
   if (!isOwner && !isAdmin) {

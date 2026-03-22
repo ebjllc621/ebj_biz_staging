@@ -28,7 +28,7 @@ import { bigIntToNumber } from '@core/utils/bigint';
 
 export interface ListingSummary {
   id: number;
-  business_name: string;
+  name: string;
   slug: string;
   category_name: string | null;
   created_at: Date;
@@ -218,7 +218,7 @@ export class ListingDigestService {
   ): Promise<ListingSummary[]> {
     try {
       const result = await this.db.query<ListingSummary>(
-        `SELECT l.id, l.business_name, l.slug, c.name as category_name, l.created_at
+        `SELECT l.id, l.name, l.slug, c.name as category_name, l.created_at
          FROM listings l
          LEFT JOIN categories c ON c.id = l.category_id
          WHERE l.category_id = ?
