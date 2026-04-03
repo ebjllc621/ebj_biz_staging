@@ -20,6 +20,7 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import Map, { Marker, Popup, NavigationControl } from 'react-map-gl/mapbox';
 import type { MapRef } from 'react-map-gl/mapbox';
+import type { LngLatBoundsLike } from 'mapbox-gl';
 import { MapPin } from 'lucide-react';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import type { ListingWithCoordinates } from '@/features/listings/types';
@@ -36,6 +37,8 @@ interface ListingsMapProps {
   onMarkerHover?: (_listingId: number | null) => void;
   /** Currently highlighted listing ID (from grid hover) */
   highlightedListingId?: number | null;
+  /** User's current location for centering when no listings nearby */
+  userLocation?: { lat: number; lng: number } | null;
   /** Additional CSS classes */
   className?: string;
 }
@@ -48,12 +51,14 @@ export function ListingsMap({
   onMarkerClick,
   onMarkerHover: _onMarkerHover,
   highlightedListingId,
+  userLocation,
   className = '',
 }: ListingsMapProps) {
   const mapRef = useRef<MapRef>(null);
   const [popupInfo, setPopupInfo] = useState<ListingWithCoordinates | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
+  const hasFitBounds = useRef(false);
 
   // Mapbox token validation
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
@@ -71,26 +76,63 @@ export function ListingsMap({
     [listings]
   );
 
-  // Calculate map center from listings
-  const mapCenter = useMemo(() => {
+  // Calculate initial view state (used before fitBounds fires)
+  const initialViewState = useMemo(() => {
     if (listingsWithCoords.length === 0) {
-      return { latitude: 43.6532, longitude: -79.3832, zoom: 11 }; // Default (Toronto)
+      // If user location available, center there; otherwise default to Toronto
+      if (userLocation) {
+        return { latitude: userLocation.lat, longitude: userLocation.lng, zoom: 11 };
+      }
+      return { latitude: 43.6532, longitude: -79.3832, zoom: 11 };
     }
 
-    const avgLat =
-      listingsWithCoords.reduce((sum, l) => sum + l.latitude, 0) / listingsWithCoords.length;
-    const avgLng =
-      listingsWithCoords.reduce((sum, l) => sum + l.longitude, 0) / listingsWithCoords.length;
+    if (listingsWithCoords.length === 1) {
+      // Single listing: center directly on it at street-level zoom
+      const single = listingsWithCoords[0]!;
+      return { latitude: single.latitude, longitude: single.longitude, zoom: 14 };
+    }
 
-    return { latitude: avgLat, longitude: avgLng, zoom: 11 };
-  }, [listingsWithCoords]);
+    // Multiple listings: start with average (fitBounds will adjust on load)
+    const avgLat = listingsWithCoords.reduce((sum, l) => sum + l.latitude, 0) / listingsWithCoords.length;
+    const avgLng = listingsWithCoords.reduce((sum, l) => sum + l.longitude, 0) / listingsWithCoords.length;
+    return { latitude: avgLat, longitude: avgLng, zoom: 4 };
+  }, [listingsWithCoords, userLocation]);
 
-  const [viewState, setViewState] = useState(mapCenter);
+  const [viewState, setViewState] = useState(initialViewState);
 
-  // Update viewState when mapCenter changes
+  // fitBounds: zoom to show all markers when listings change
   useEffect(() => {
-    setViewState(mapCenter);
-  }, [mapCenter]);
+    const map = mapRef.current;
+    if (!map || !mapLoaded || listingsWithCoords.length < 2) {
+      // For 0-1 listings, initialViewState handles it
+      if (listingsWithCoords.length <= 1) {
+        setViewState(initialViewState);
+      }
+      return;
+    }
+
+    // Calculate bounding box of all markers
+    let minLat = Infinity, maxLat = -Infinity, minLng = Infinity, maxLng = -Infinity;
+    for (const l of listingsWithCoords) {
+      if (l.latitude < minLat) minLat = l.latitude;
+      if (l.latitude > maxLat) maxLat = l.latitude;
+      if (l.longitude < minLng) minLng = l.longitude;
+      if (l.longitude > maxLng) maxLng = l.longitude;
+    }
+
+    const bounds: LngLatBoundsLike = [[minLng, minLat], [maxLng, maxLat]];
+
+    try {
+      map.fitBounds(bounds, {
+        padding: { top: 50, bottom: 50, left: 50, right: 50 },
+        maxZoom: 15,
+        duration: hasFitBounds.current ? 800 : 0, // animate subsequent fits, instant on first
+      });
+      hasFitBounds.current = true;
+    } catch {
+      // Fallback if fitBounds fails (e.g., invalid bounds)
+    }
+  }, [listingsWithCoords, mapLoaded, initialViewState]);
 
   // Handle map load
   const handleMapLoad = useCallback(() => {

@@ -22,7 +22,7 @@
  * Query parameters:
  * - page: number >= 1 (default 1) - Page number for pagination
  * - pageSize: number 1-50 (default 20) - Items per page
- * - sort: 'recent' | 'name' (default 'recent') - Sort order
+ * - sort: 'recent' | 'name' | 'nearest' (default 'recent') - Sort order
  * - q: optional string - Search query for title/description/category names
  * - category: optional string - Category slug to filter by (supports multi-category via active_categories)
  * - userId: optional number - Filter by owner user ID
@@ -117,7 +117,7 @@ interface ListingsSearchData {
 function parseSearchParams(request: Request): {
   page: number;
   pageSize: number;
-  sort: 'recent' | 'name';
+  sort: 'recent' | 'name' | 'nearest';
   q?: string;
   category?: string;
   userId?: number;
@@ -159,14 +159,14 @@ function parseSearchParams(request: Request): {
     pageSize = parsed;
   }
 
-  // Parse sort (default: 'recent', allowed: 'recent' | 'name')
-  let sort: 'recent' | 'name' = 'recent';
+  // Parse sort (default: 'recent', allowed: 'recent' | 'name' | 'nearest')
+  let sort: 'recent' | 'name' | 'nearest' = 'recent';
   const sortParam = searchParams.get('sort');
   if (sortParam !== null) {
-    if (sortParam !== 'recent' && sortParam !== 'name') {
+    if (sortParam !== 'recent' && sortParam !== 'name' && sortParam !== 'nearest') {
       throw new BizError({
         code: 'VALIDATION_ERROR',
-        message: 'Sort parameter must be either "recent" or "name"'
+        message: 'Sort parameter must be "recent", "name", or "nearest"'
       });
     }
     sort = sortParam;
@@ -340,11 +340,26 @@ export const GET = apiHandler(async (context: ApiContext) => {
     queryParams.push(fromListing);
   }
 
-  // Priority 2: Claimed listings within 200 miles
-  if (userLat !== undefined && userLng !== undefined) {
+  // Sort by nearest: Haversine distance ascending (requires user coordinates)
+  if (sort === 'nearest' && userLat !== undefined && userLng !== undefined) {
+    // Listings with coordinates sorted by distance, then listings without coordinates last
+    orderParts.push(`
+      CASE WHEN l.latitude IS NULL OR l.longitude IS NULL THEN 1 ELSE 0 END ASC`);
+    orderParts.push(`
+      CASE
+        WHEN l.latitude IS NOT NULL AND l.longitude IS NOT NULL THEN
+          3959 * ACOS(
+            LEAST(1, GREATEST(-1,
+              COS(RADIANS(?)) * COS(RADIANS(l.latitude)) * COS(RADIANS(l.longitude) - RADIANS(?))
+              + SIN(RADIANS(?)) * SIN(RADIANS(l.latitude))
+            ))
+          )
+        ELSE 999999
+      END ASC`);
+    queryParams.push(userLat, userLng, userLat);
+  } else if (userLat !== undefined && userLng !== undefined) {
+    // Priority 2: Claimed listings within 200 miles (for non-nearest sorts)
     // Haversine formula for distance in miles (3959 = Earth's radius in miles)
-    // Priority: claimed=1 AND distance <= 200 miles gets priority 1, otherwise 0
-    // Note: Only apply priority to listings with valid coordinates
     orderParts.push(`
       CASE
         WHEN l.claimed = 1
@@ -361,12 +376,16 @@ export const GET = apiHandler(async (context: ApiContext) => {
         THEN 0
         ELSE 1
       END ASC`);
-    // Add user coordinates as parameters (lat, lng, lat for the formula)
     queryParams.push(userLat, userLng, userLat);
   }
 
-  // Priority 3: Base sort (recent or name)
-  orderParts.push(baseOrderSQL);
+  // Final fallback sort (recent or name) - always appended for stable ordering
+  if (sort !== 'nearest') {
+    orderParts.push(baseOrderSQL);
+  } else {
+    // For nearest sort, use created_at as tiebreaker for same-distance listings
+    orderParts.push('l.created_at DESC');
+  }
 
   orderSQL = orderParts.join(', ');
 

@@ -16,6 +16,7 @@
 export { ListingHero } from './ListingHero';
 export { ListingActionBar } from './ListingActionBar';
 export { ListingActionButtons } from './ListingActionButtons';
+export { ListingBreadcrumb } from './ListingBreadcrumb';
 
 // Phase 2
 export { ListingOverview } from './ListingOverview';

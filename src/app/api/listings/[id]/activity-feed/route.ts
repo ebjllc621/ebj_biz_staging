@@ -67,8 +67,8 @@ export const GET = apiHandler(async (context: ApiContext) => {
        ORDER BY created_at DESC LIMIT ?`,
       [listingId, limit]
     ),
-    db.query<{ id: number; rating: number; comment: string | null; created_at: Date }>(
-      `SELECT id, rating, SUBSTRING(comment, 1, 150) AS comment, created_at
+    db.query<{ id: number; rating: number; review_text: string | null; created_at: Date }>(
+      `SELECT id, rating, SUBSTRING(review_text, 1, 150) AS review_text, created_at
        FROM reviews
        WHERE listing_id = ? AND status = 'approved'
        ORDER BY created_at DESC LIMIT ?`,
@@ -103,7 +103,7 @@ export const GET = apiHandler(async (context: ApiContext) => {
       id: `review-${r.id}`,
       type: 'review' as const,
       title: `${r.rating}-star review`,
-      description: r.comment || 'New review posted',
+      description: r.review_text || 'New review posted',
       created_at: new Date(r.created_at).toISOString(),
     })),
   ];

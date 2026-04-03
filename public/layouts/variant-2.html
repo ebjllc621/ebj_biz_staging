@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bizconekt — Variant 2: Bold Geometry</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #002641;
+    --navy-mid: #003a5c;
+    --orange: #ed6437;
+    --orange-dark: #d54a1f;
+    --teal: #0d7377;
+    --cream: #f7f5ef;
+    --warm-gray: #e0ddd3;
+    --text-primary: #0f1a24;
+    --text-secondary: #4a5568;
+    --white: #ffffff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--cream);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* ─── NAV ─── */
+  .nav {
+    background: var(--navy);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .nav-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+  }
+  .nav-logo { height: 30px; filter: brightness(0) invert(1); }
+  .nav-links { display: flex; gap: 0; align-items: center; height: 100%; }
+  .nav-links a {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0 20px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+  }
+  .nav-links a:hover { color: #fff; border-bottom-color: var(--orange); }
+  .nav-cta {
+    background: var(--orange) !important;
+    color: var(--white) !important;
+    border-radius: 4px;
+    height: auto !important;
+    padding: 10px 24px !important;
+    border: none !important;
+  }
+  .nav-cta:hover { background: var(--orange-dark) !important; }
+
+  /* ─── HERO ─── */
+  .hero {
+    background: var(--navy);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    opacity: 0.08;
+    background:
+      linear-gradient(45deg, transparent 48%, var(--orange) 48%, var(--orange) 52%, transparent 52%),
+      linear-gradient(-45deg, transparent 48%, var(--teal) 48%, var(--teal) 52%, transparent 52%);
+    background-size: 60px 60px;
+  }
+  .hero-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 100px 32px 120px;
+    position: relative;
+    z-index: 1;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+  .hero-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--orange);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 2px;
+    background: var(--orange);
+  }
+  .hero h1 {
+    font-size: 60px;
+    font-weight: 900;
+    line-height: 1.05;
+    color: var(--white);
+    margin-bottom: 28px;
+  }
+  .hero h1 .accent {
+    color: var(--orange);
+    position: relative;
+    display: inline-block;
+  }
+  .hero h1 .accent::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--orange);
+    border-radius: 2px;
+  }
+  .hero-text {
+    font-size: 17px;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.7;
+    margin-bottom: 40px;
+    max-width: 460px;
+  }
+  .hero-actions { display: flex; gap: 16px; }
+  .btn-geo {
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 16px 36px;
+    border: none;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 100%, 12px 100%);
+  }
+  .btn-geo-primary {
+    background: var(--orange);
+    color: var(--white);
+  }
+  .btn-geo-primary:hover { background: var(--orange-dark); }
+  .btn-geo-secondary {
+    background: transparent;
+    color: var(--white);
+    border: 2px solid rgba(255,255,255,0.3);
+    clip-path: none;
+  }
+  .btn-geo-secondary:hover { border-color: var(--white); }
+
+  /* Hero right — geometric stats */
+  .hero-right { position: relative; }
+  .geo-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .geo-card {
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 32px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .geo-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+  }
+  .geo-card:nth-child(1)::before { background: var(--orange); }
+  .geo-card:nth-child(2)::before { background: var(--teal); }
+  .geo-card:nth-child(3)::before { background: #6a9bcc; }
+  .geo-card:nth-child(4)::before { background: #788c5d; }
+  .geo-card:nth-child(1) { clip-path: polygon(0 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%); }
+  .geo-card:nth-child(2) { clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px); }
+  .geo-card:nth-child(3) { clip-path: polygon(0 0, 100% 0, 100% 100%, 16px 100%, 0 calc(100% - 16px)); }
+  .geo-card:nth-child(4) { clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%); }
+  .geo-number {
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+  .geo-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .hero-logo-float {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 64px;
+    height: 64px;
+    background: var(--navy);
+    border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+  }
+  .hero-logo-float img { width: 36px; height: 36px; }
+
+  /* ─── ANGULAR DIVIDER ─── */
+  .angle-divider {
+    height: 60px;
+    background: var(--navy);
+    clip-path: polygon(0 0, 100% 0, 100% 0%, 0 100%);
+  }
+
+  /* ─── SEARCH ─── */
+  .search-section {
+    max-width: 800px;
+    margin: -30px auto 0;
+    padding: 0 32px;
+    position: relative;
+    z-index: 10;
+  }
+  .search-bar {
+    display: flex;
+    background: var(--white);
+    border-radius: 0;
+    box-shadow: 0 16px 48px rgba(0,38,65,0.12);
+    overflow: hidden;
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  }
+  .search-bar input {
+    flex: 1;
+    border: none;
+    padding: 20px 28px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    outline: none;
+    color: var(--text-primary);
+  }
+  .search-bar input::placeholder { color: #aaa; }
+  .search-bar button {
+    background: var(--orange);
+    color: var(--white);
+    border: none;
+    padding: 0 32px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .search-bar button:hover { background: var(--orange-dark); }
+
+  /* ─── FEATURES ─── */
+  .features {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 100px 32px 80px;
+  }
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--orange);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  .section-title {
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--navy);
+    text-align: center;
+    margin-bottom: 56px;
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+  }
+  .feature-cell {
+    padding: 40px 28px;
+    border: 1px solid var(--warm-gray);
+    margin: -0.5px;
+    position: relative;
+    transition: all 0.25s;
+    background: var(--cream);
+  }
+  .feature-cell:hover {
+    background: var(--white);
+    z-index: 2;
+    box-shadow: 0 8px 32px rgba(0,38,65,0.08);
+  }
+  .feature-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--warm-gray);
+    margin-bottom: 16px;
+    line-height: 1;
+  }
+  .feature-cell:hover .feature-num { color: var(--orange); }
+  .feature-cell h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 8px;
+  }
+  .feature-cell p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  /* ─── LISTINGS ─── */
+  .listings-section {
+    background: var(--navy);
+    padding: 80px 0;
+    position: relative;
+  }
+  .listings-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: var(--cream);
+    clip-path: polygon(0 0, 100% 0, 100% 0%, 0 100%);
+  }
+  .listings-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+  .listings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 40px;
+  }
+  .listings-header h2 {
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--white);
+  }
+  .listings-header a {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--orange);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .listings-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .listing-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    overflow: hidden;
+    transition: all 0.25s;
+    cursor: pointer;
+  }
+  .listing-card:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: var(--orange);
+    transform: translateY(-4px);
+  }
+  .listing-thumb {
+    height: 160px;
+    background: linear-gradient(135deg, var(--navy-mid), var(--teal));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .listing-thumb::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: var(--orange);
+  }
+  .listing-thumb span { color: rgba(255,255,255,0.3); font-size: 12px; }
+  .listing-info { padding: 20px; }
+  .listing-info h4 { font-size: 15px; font-weight: 700; color: var(--white); margin-bottom: 4px; }
+  .listing-info p { font-size: 12px; color: rgba(255,255,255,0.5); }
+
+  /* ─── CTA ─── */
+  .cta {
+    padding: 100px 32px;
+    text-align: center;
+    position: relative;
+  }
+  .cta::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    width: 300px;
+    height: 300px;
+    border: 2px solid var(--warm-gray);
+    opacity: 0.5;
+  }
+  .cta h2 {
+    font-size: 44px;
+    font-weight: 900;
+    color: var(--navy);
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+  }
+  .cta p {
+    font-size: 17px;
+    color: var(--text-secondary);
+    margin-bottom: 36px;
+    position: relative;
+    z-index: 1;
+  }
+  .cta .btn-geo { position: relative; z-index: 1; }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    background: var(--navy);
+    padding: 40px 0;
+  }
+  .footer-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer img { height: 24px; filter: brightness(0) invert(1); opacity: 0.6; }
+  .footer p { font-size: 12px; color: rgba(255,255,255,0.4); }
+
+  @media (max-width: 768px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 48px; }
+    .hero h1 { font-size: 36px; }
+    .features-grid { grid-template-columns: 1fr 1fr; }
+    .listings-grid { grid-template-columns: 1fr; }
+    .geo-container { grid-template-columns: 1fr 1fr; }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <img src="/uploads/site/branding/namelogo-horizontal.png" alt="Bizconekt" class="nav-logo">
+    <div class="nav-links">
+      <a href="#">Listings</a>
+      <a href="#">Events</a>
+      <a href="#">Offers</a>
+      <a href="#">Jobs</a>
+      <a href="#" class="nav-cta">Join Free</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-inner">
+    <div class="hero-grid">
+      <div>
+        <div class="hero-eyebrow">Business Network</div>
+        <h1>Connect.<br>Discover.<br><span class="accent">Grow.</span></h1>
+        <p class="hero-text">Your gateway to the local business community. Find services, connect with professionals, and discover opportunities.</p>
+        <div class="hero-actions">
+          <button class="btn-geo btn-geo-primary">Join Bizconekt &rarr;</button>
+          <button class="btn-geo-secondary">Explore Listings</button>
+        </div>
+      </div>
+      <div class="hero-right">
+        <div class="geo-container">
+          <div class="geo-card">
+            <div class="geo-number">500+</div>
+            <div class="geo-label">Businesses</div>
+          </div>
+          <div class="geo-card">
+            <div class="geo-number">1.2K</div>
+            <div class="geo-label">Members</div>
+          </div>
+          <div class="geo-card">
+            <div class="geo-number">150+</div>
+            <div class="geo-label">Events</div>
+          </div>
+          <div class="geo-card">
+            <div class="geo-number">4.9★</div>
+            <div class="geo-label">Rating</div>
+          </div>
+        </div>
+        <div class="hero-logo-float">
+          <img src="/uploads/site/branding/logo-icon.png" alt="B">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="angle-divider"></div>
+
+<!-- SEARCH -->
+<section class="search-section">
+  <div class="search-bar">
+    <input type="text" placeholder="Search businesses, events, offers...">
+    <button>Search</button>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+  <div class="section-label">Platform</div>
+  <h2 class="section-title">Built for Business</h2>
+  <div class="features-grid">
+    <div class="feature-cell">
+      <div class="feature-num">01</div>
+      <h3>Business Directory</h3>
+      <p>Discover local businesses and services in your area</p>
+    </div>
+    <div class="feature-cell">
+      <div class="feature-num">02</div>
+      <h3>Events & Networking</h3>
+      <p>Find professional events and networking opportunities</p>
+    </div>
+    <div class="feature-cell">
+      <div class="feature-num">03</div>
+      <h3>Special Offers</h3>
+      <p>Access exclusive deals and promotional offers</p>
+    </div>
+    <div class="feature-cell">
+      <div class="feature-num">04</div>
+      <h3>Pro Network</h3>
+      <p>Connect with other business professionals</p>
+    </div>
+  </div>
+</section>
+
+<!-- LISTINGS -->
+<section class="listings-section">
+  <div class="listings-inner">
+    <div class="listings-header">
+      <h2>Featured Listings</h2>
+      <a href="#">View All &rarr;</a>
+    </div>
+    <div class="listings-grid">
+      <div class="listing-card">
+        <div class="listing-thumb"><span>Business Photo</span></div>
+        <div class="listing-info">
+          <h4>Downtown Coffee Roasters</h4>
+          <p>Artisan coffee &amp; coworking space</p>
+        </div>
+      </div>
+      <div class="listing-card">
+        <div class="listing-thumb" style="background:linear-gradient(135deg,#d54a1f,#ed6437)"><span>Business Photo</span></div>
+        <div class="listing-info">
+          <h4>Peak Design Studio</h4>
+          <p>Branding, web design &amp; marketing</p>
+        </div>
+      </div>
+      <div class="listing-card">
+        <div class="listing-thumb" style="background:linear-gradient(135deg,#0d7377,#6a9bcc)"><span>Business Photo</span></div>
+        <div class="listing-info">
+          <h4>Summit Legal Partners</h4>
+          <p>Business law &amp; contract advisory</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <h2>Ready to Join?</h2>
+  <p>Start connecting with local businesses today. Free to join.</p>
+  <button class="btn-geo btn-geo-primary">Create Free Account &rarr;</button>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <img src="/uploads/site/branding/namelogo-horizontal.png" alt="Bizconekt">
+    <p>&copy; 2026 Bizconekt</p>
+  </div>
+</footer>
+
+</body>
+</html>

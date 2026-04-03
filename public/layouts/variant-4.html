@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bizconekt — Variant 4: Brutalist Editorial</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --off-black: #161616;
+    --dark-gray: #2a2a2a;
+    --mid-gray: #666;
+    --light-gray: #aaa;
+    --border: #ddd;
+    --paper: #f5f3ed;
+    --white: #ffffff;
+    --orange: #ed6437;
+    --orange-dim: rgba(237,100,55,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--paper);
+    color: var(--black);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Grain overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.6;
+  }
+
+  /* ─── NAV ─── */
+  .nav {
+    border-bottom: 2px solid var(--black);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--paper);
+  }
+  .nav-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+  }
+  .nav-wordmark {
+    font-family: 'Instrument Serif', serif;
+    font-size: 24px;
+    color: var(--black);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .nav-wordmark img { height: 28px; }
+  .nav-links { display: flex; gap: 0; align-items: center; height: 100%; }
+  .nav-links a {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--mid-gray);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0 20px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    border-left: 1px solid var(--border);
+    transition: all 0.15s;
+  }
+  .nav-links a:hover { color: var(--black); background: var(--orange-dim); }
+  .nav-cta {
+    background: var(--black) !important;
+    color: var(--white) !important;
+    border-left: 1px solid var(--black) !important;
+  }
+  .nav-cta:hover { background: var(--orange) !important; }
+
+  /* ─── HERO ─── */
+  .hero {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 32px;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+  .hero-top {
+    padding: 80px 0 48px;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--light-gray);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .hero-label::before {
+    content: '●';
+    color: var(--orange);
+    font-size: 8px;
+  }
+  .hero h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 96px;
+    font-weight: 400;
+    line-height: 0.95;
+    color: var(--black);
+    margin-bottom: 0;
+    max-width: 900px;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--orange);
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-left {
+    padding: 48px 48px 48px 0;
+    border-right: 1px solid var(--border);
+  }
+  .hero-right {
+    padding: 48px 0 48px 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .hero-text {
+    font-size: 17px;
+    color: var(--mid-gray);
+    line-height: 1.7;
+    max-width: 420px;
+    margin-bottom: 32px;
+  }
+  .hero-actions { display: flex; gap: 12px; }
+  .btn-brutal {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 16px 32px;
+    border: 2px solid var(--black);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-brutal-fill {
+    background: var(--black);
+    color: var(--white);
+  }
+  .btn-brutal-fill:hover { background: var(--orange); border-color: var(--orange); }
+  .btn-brutal-outline {
+    background: transparent;
+    color: var(--black);
+  }
+  .btn-brutal-outline:hover { background: var(--black); color: var(--white); }
+
+  /* Hero stats */
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+  }
+  .h-stat {
+    padding: 20px;
+    border: 1px solid var(--border);
+    margin: -0.5px;
+  }
+  .h-stat-num {
+    font-family: 'Instrument Serif', serif;
+    font-size: 40px;
+    color: var(--black);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .h-stat-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--light-gray);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .hero-logo-strip {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-logo-strip img { height: 40px; }
+  .hero-logo-strip span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--light-gray);
+    letter-spacing: 0.05em;
+  }
+
+  /* ─── SEARCH ─── */
+  .search-section {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 32px;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+  .search-inner {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+  }
+  .search-inner input {
+    flex: 1;
+    border: none;
+    padding: 24px 0;
+    font-family: 'Instrument Serif', serif;
+    font-size: 20px;
+    background: transparent;
+    outline: none;
+    color: var(--black);
+  }
+  .search-inner input::placeholder {
+    color: var(--light-gray);
+    font-style: italic;
+  }
+  .search-inner button {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    background: transparent;
+    border: none;
+    border-left: 1px solid var(--border);
+    padding: 0 32px;
+    color: var(--black);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .search-inner button:hover { background: var(--black); color: var(--white); }
+
+  /* ─── FEATURES ─── */
+  .features {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 32px;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+  .features-header {
+    padding: 64px 0 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  .features-header h2 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 48px;
+    font-weight: 400;
+  }
+  .features-header span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--light-gray);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .feat {
+    padding: 40px 24px;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s;
+    cursor: default;
+  }
+  .feat:last-child { border-right: none; }
+  .feat:hover { background: var(--orange-dim); }
+  .feat-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--light-gray);
+    letter-spacing: 0.1em;
+    margin-bottom: 20px;
+  }
+  .feat h3 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--black);
+    margin-bottom: 8px;
+  }
+  .feat p {
+    font-size: 13px;
+    color: var(--mid-gray);
+    line-height: 1.6;
+  }
+
+  /* ─── LISTINGS ─── */
+  .listings {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 32px;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+  .listings-header {
+    padding: 64px 0 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  .listings-header h2 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 48px;
+    font-weight: 400;
+  }
+  .listings-header a {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--orange);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .listing-row {
+    display: grid;
+    grid-template-columns: 200px 1fr auto;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+    cursor: pointer;
+  }
+  .listing-row:hover { background: var(--orange-dim); }
+  .listing-thumb {
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid var(--border);
+  }
+  .listing-thumb span { font-size: 11px; color: var(--light-gray); }
+  .listing-row:nth-child(1) .listing-thumb { background: linear-gradient(135deg, #002641, #1a4d6e); }
+  .listing-row:nth-child(2) .listing-thumb { background: linear-gradient(135deg, #d54a1f, #ed6437); }
+  .listing-row:nth-child(3) .listing-thumb { background: linear-gradient(135deg, #2a2a2a, #555); }
+  .listing-body {
+    padding: 28px 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .listing-body h4 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--black);
+    margin-bottom: 4px;
+  }
+  .listing-body p { font-size: 13px; color: var(--mid-gray); }
+  .listing-meta {
+    padding: 28px 24px;
+    display: flex;
+    align-items: center;
+    border-left: 1px solid var(--border);
+  }
+  .listing-meta span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--light-gray);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* ─── CTA ─── */
+  .cta {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 32px;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+  .cta-inner {
+    padding: 80px 0;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 48px;
+    align-items: center;
+  }
+  .cta h2 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 56px;
+    font-weight: 400;
+    line-height: 1.1;
+  }
+  .cta h2 em { font-style: italic; color: var(--orange); }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px 32px;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer img { height: 20px; opacity: 0.4; }
+  .footer p {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--light-gray);
+    letter-spacing: 0.05em;
+  }
+
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 48px; }
+    .hero-grid { grid-template-columns: 1fr; }
+    .hero-left { border-right: none; padding-right: 0; }
+    .features-grid { grid-template-columns: 1fr 1fr; }
+    .listing-row { grid-template-columns: 1fr; }
+    .listing-thumb { height: 140px; border-right: none; border-bottom: 1px solid var(--border); }
+    .listing-meta { border-left: none; border-top: 1px solid var(--border); }
+    .nav-links { display: none; }
+    .cta-inner { grid-template-columns: 1fr; }
+    .cta h2 { font-size: 36px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-wordmark">
+      <img src="/uploads/site/branding/logo-icon.png" alt="B">
+      Bizconekt
+    </a>
+    <div class="nav-links">
+      <a href="#">Listings</a>
+      <a href="#">Events</a>
+      <a href="#">Offers</a>
+      <a href="#">Jobs</a>
+      <a href="#" class="nav-cta">Join</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-logo-strip">
+    <img src="/uploads/site/branding/namelogo-horizontal.png" alt="Bizconekt">
+    <span>— Your Local Business Network</span>
+  </div>
+  <div class="hero-top">
+    <div class="hero-label">Est. 2024</div>
+    <h1>Connect, Discover, <em>Grow</em></h1>
+  </div>
+  <div class="hero-grid">
+    <div class="hero-left">
+      <p class="hero-text">
+        Your gateway to the local business community. Find services, connect with professionals, and discover opportunities that matter to you.
+      </p>
+      <div class="hero-actions">
+        <button class="btn-brutal btn-brutal-fill">Join Bizconekt &rarr;</button>
+        <button class="btn-brutal btn-brutal-outline">Explore</button>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-stats">
+        <div class="h-stat">
+          <div class="h-stat-num">500+</div>
+          <div class="h-stat-label">Businesses</div>
+        </div>
+        <div class="h-stat">
+          <div class="h-stat-num">1,200+</div>
+          <div class="h-stat-label">Members</div>
+        </div>
+        <div class="h-stat">
+          <div class="h-stat-num">150+</div>
+          <div class="h-stat-label">Events</div>
+        </div>
+        <div class="h-stat">
+          <div class="h-stat-num">4.9</div>
+          <div class="h-stat-label">Avg Rating</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SEARCH -->
+<div class="search-section">
+  <div class="search-inner">
+    <input type="text" placeholder="What are you looking for?">
+    <button>Search &rarr;</button>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="features">
+  <div class="features-header">
+    <h2>Platform</h2>
+    <span>04 Features</span>
+  </div>
+  <div class="features-grid">
+    <div class="feat">
+      <div class="feat-num">001</div>
+      <h3>Business Directory</h3>
+      <p>Discover local businesses and services in your area</p>
+    </div>
+    <div class="feat">
+      <div class="feat-num">002</div>
+      <h3>Events &amp; Networking</h3>
+      <p>Find professional events and networking opportunities</p>
+    </div>
+    <div class="feat">
+      <div class="feat-num">003</div>
+      <h3>Special Offers</h3>
+      <p>Access exclusive deals and promotional offers</p>
+    </div>
+    <div class="feat">
+      <div class="feat-num">004</div>
+      <h3>Professional Network</h3>
+      <p>Connect with other business professionals</p>
+    </div>
+  </div>
+</section>
+
+<!-- LISTINGS -->
+<section class="listings">
+  <div class="listings-header">
+    <h2>Featured</h2>
+    <a href="#">View All &rarr;</a>
+  </div>
+  <div class="listing-row">
+    <div class="listing-thumb"><span></span></div>
+    <div class="listing-body">
+      <h4>Downtown Coffee Roasters</h4>
+      <p>Artisan coffee &amp; coworking space</p>
+    </div>
+    <div class="listing-meta"><span>Food &amp; Drink</span></div>
+  </div>
+  <div class="listing-row">
+    <div class="listing-thumb"><span></span></div>
+    <div class="listing-body">
+      <h4>Peak Design Studio</h4>
+      <p>Branding, web design &amp; marketing</p>
+    </div>
+    <div class="listing-meta"><span>Creative</span></div>
+  </div>
+  <div class="listing-row">
+    <div class="listing-thumb"><span></span></div>
+    <div class="listing-body">
+      <h4>Summit Legal Partners</h4>
+      <p>Business law &amp; contract advisory</p>
+    </div>
+    <div class="listing-meta"><span>Professional</span></div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <div class="cta-inner">
+    <h2>Ready to join<br>the <em>community?</em></h2>
+    <button class="btn-brutal btn-brutal-fill">Create Free Account &rarr;</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <img src="/uploads/site/branding/namelogo-horizontal.png" alt="Bizconekt">
+  <p>&copy; 2026 Bizconekt</p>
+</footer>
+
+</body>
+</html>

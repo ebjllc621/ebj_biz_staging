@@ -552,6 +552,7 @@ export function ListingsPageClient() {
         onDisplayModeChange={handleDisplayModeChange}
         isMapVisible={isMapVisible}
         onMapToggle={() => setIsMapVisible(prev => !prev)}
+        hasUserLocation={!!userLocation}
       />
 
       {/* Main Content Area */}
@@ -565,6 +566,7 @@ export function ListingsPageClient() {
                 onMarkerClick={handleMarkerClick}
                 onMarkerHover={setHighlightedListingId}
                 highlightedListingId={highlightedListingId}
+                userLocation={userLocation}
                 className="h-[600px] rounded-lg overflow-hidden shadow-sm"
               />
             </div>

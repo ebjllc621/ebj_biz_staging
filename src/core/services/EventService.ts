@@ -4747,7 +4747,7 @@ export class EventService {
     }>(
       `SELECT etp.*,
         e.title as event_title, e.slug as event_slug,
-        u.name as buyer_name, u.email as buyer_email,
+        COALESCE(u.display_name, CONCAT(u.first_name, ' ', u.last_name)) as buyer_name, u.email as buyer_email,
         et.ticket_name
        FROM event_ticket_purchases etp
        JOIN events e ON etp.event_id = e.id
@@ -4874,7 +4874,7 @@ export class EventService {
     }>(
       `SELECT etp.*,
         e.title as event_title, e.slug as event_slug,
-        u.name as buyer_name, u.email as buyer_email,
+        COALESCE(u.display_name, CONCAT(u.first_name, ' ', u.last_name)) as buyer_name, u.email as buyer_email,
         et.ticket_name
        FROM event_ticket_purchases etp
        JOIN events e ON etp.event_id = e.id

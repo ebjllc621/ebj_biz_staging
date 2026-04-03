@@ -191,7 +191,7 @@ export const GET = apiHandler(async (context) => {
       []
     ),
     db.query<CountRow>(
-      "SELECT COUNT(*) as count FROM admin_activity WHERE action_type = 'content_report' AND status = 'pending'",
+      "SELECT COUNT(*) as count FROM admin_activity WHERE action_type = 'content_report' AND approved_by IS NULL",
       []
     ),
   ]);

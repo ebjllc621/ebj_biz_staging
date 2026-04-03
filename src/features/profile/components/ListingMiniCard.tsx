@@ -330,6 +330,7 @@ export function ListingMiniCard({ listing }: ListingMiniCardProps) {
                 src={miniMapUrl}
                 alt="Location map"
                 className="w-full h-full object-cover group-hover:opacity-90 transition-opacity"
+                referrerPolicy="no-referrer-when-downgrade"
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
                 <MapPin className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />

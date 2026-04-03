@@ -98,7 +98,7 @@ export function SidebarLocationCard({ listing }: SidebarLocationCardProps) {
             src={mapUrl}
             alt={`Map showing ${listing.name}`}
             className="w-full h-full object-cover group-hover:opacity-80 transition-opacity"
-            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
           />
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
             <Navigation className="w-5 h-5 text-white" />

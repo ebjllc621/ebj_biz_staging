@@ -144,12 +144,12 @@ export const GET = apiHandler(async (context: ApiContext) => {
         CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''), ' RSVP''d to ', e.title) as title,
         CONCAT('Status: ', er.rsvp_status) as description,
         CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) as actor_name,
-        er.created_at
+        er.rsvp_date as created_at
       FROM event_rsvps er
       JOIN events e ON er.event_id = e.id
       LEFT JOIN users u ON er.user_id = u.id
       WHERE e.listing_id = ?
-      ORDER BY er.created_at DESC
+      ORDER BY er.rsvp_date DESC
       LIMIT ?`,
       [listingId, limit]
     );

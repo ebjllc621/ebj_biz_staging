@@ -280,6 +280,7 @@ export const systemControls: AdminModule[] = [
     icon: Settings,
     children: [
       { key: 'systemSettings', label: 'System Settings', href: '/admin/settings' },
+      { key: 'layouts', label: 'Layouts', href: '/admin/settings/layouts', icon: LayoutTemplate },
       { key: 'cronJobs', label: 'Cron Jobs', href: '/admin/settings/cron-jobs', icon: Timer },
     ]
   },

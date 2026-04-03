@@ -58,6 +58,7 @@ import {
   SectionLayoutManager,  // Phase 12.2 - Section Layout Manager
   FeatureLayoutManager,  // Phase R2 - Feature Layout Manager
   ListingActionButtons,  // Layout refactor - action buttons at top of main content
+  ListingBreadcrumb,     // Breadcrumb navigation
 } from '@/features/listings/components/details';
 import { TierGatedFeature } from '@/features/listings/components/TierGatedFeature';
 import { WebVitalsMonitor } from '@/features/listings/components/details/WebVitalsMonitor';
@@ -648,6 +649,13 @@ function ListingDetailsClientInternal({
       <WebVitalsMonitor />
 
       <div className="min-h-screen bg-gray-50">
+        {/* Breadcrumb Navigation */}
+        <ListingBreadcrumb
+          title={listing.name}
+          categoryName={categoryName}
+          categorySlug={categorySlug}
+        />
+
         {/* Hero Section - includes cover, logo, info card with quick facts */}
         <ListingHero
           listing={listing}

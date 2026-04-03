@@ -126,7 +126,7 @@ export function ListingLocation({ listing, isEditMode }: ListingLocationProps) {
             src={mapUrl}
             alt={`Map showing location of ${listing.name}`}
             className="w-full h-full object-cover"
-            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
           />
           {/* Overlay for click-to-directions on mobile */}
           <button

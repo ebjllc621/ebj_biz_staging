@@ -16,7 +16,7 @@ import { withCsrf } from '@/lib/security/withCsrf';
 
 async function handleGet(context: ApiContext) {
   const db = getDatabaseService();
-  const results = await db.query('SELECT * FROM site_settings ORDER BY `group`, `key`');
+  const results = await db.query('SELECT * FROM site_settings ORDER BY `setting_group`, `setting_key`');
 
   return createSuccessResponse({ settings: results.rows });
 }
@@ -33,7 +33,7 @@ async function handlePut(context: ApiContext) {
 
   for (const setting of settings) {
     await db.query(
-      'UPDATE site_settings SET value = ?, updated_at = NOW() WHERE `key` = ?',
+      'UPDATE site_settings SET setting_value = ?, updated_at = NOW() WHERE `setting_key` = ?',
       [setting.value, setting.key]
     );
   }

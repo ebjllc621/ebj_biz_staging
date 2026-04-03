@@ -57,7 +57,7 @@ export interface MapViewState {
 /**
  * Sort options for listings
  */
-export type SortOption = 'recent' | 'name';
+export type SortOption = 'recent' | 'name' | 'nearest';
 
 /**
  * Listings filter state

@@ -133,11 +133,11 @@ export function buildStaticMapMarker(
   if (canUseCustomMarkers()) {
     const iconUrl = getMarkerFullUrl(claimed, tier);
     const encodedIcon = encodeURIComponent(iconUrl);
-    return `icon:${encodedIcon}|${lat},${lng}`;
+    return `icon:${encodedIcon}%7C${lat},${lng}`;
   }
   // Fallback to color markers for development
   const color = getMarkerColor(claimed, tier);
-  return `color:${color}|${lat},${lng}`;
+  return `color:${color}%7C${lat},${lng}`;
 }
 
 /**

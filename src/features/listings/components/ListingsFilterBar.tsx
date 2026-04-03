@@ -52,15 +52,19 @@ export interface ListingsFilterBarProps {
   isMapVisible?: boolean;
   /** Callback to toggle map visibility */
   onMapToggle?: () => void;
+  /** Whether user location is available (enables "Nearest" sort option) */
+  hasUserLocation?: boolean;
 }
 
 /**
  * Sort options for dropdown
  */
-const SORT_OPTIONS: SortDropdownOption[] = [
+const BASE_SORT_OPTIONS: SortDropdownOption[] = [
   { value: 'recent', label: 'Most Recent' },
   { value: 'name', label: 'Name A-Z' },
 ];
+
+const NEAREST_SORT_OPTION: SortDropdownOption = { value: 'nearest', label: 'Nearest' };
 
 /**
  * ListingsFilterBar component
@@ -76,6 +80,7 @@ export function ListingsFilterBar({
   onDisplayModeChange,
   isMapVisible,
   onMapToggle,
+  hasUserLocation = false,
 }: ListingsFilterBarProps) {
   const {
     filters,
@@ -122,6 +127,11 @@ export function ListingsFilterBar({
 
   // Advanced filters panel state
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // Build sort options: include "Nearest" when user location is available
+  const sortOptions = useMemo(() => {
+    return hasUserLocation ? [NEAREST_SORT_OPTION, ...BASE_SORT_OPTIONS] : BASE_SORT_OPTIONS;
+  }, [hasUserLocation]);
 
   // Detect search mode from current input
   const searchMode = useMemo(() => detectListingSearchMode(searchValue), [searchValue]);
@@ -329,7 +339,7 @@ export function ListingsFilterBar({
                 onChange={handleSortChange}
                 className="w-full appearance-none pl-3 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-biz-navy focus:border-transparent cursor-pointer"
               >
-                {SORT_OPTIONS.map((option) => (
+                {sortOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
@@ -487,7 +497,7 @@ export function ListingsFilterBar({
             {filters.sort !== 'recent' && (
               <div className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-700 rounded">
                 <span className="font-medium">Sort:</span>
-                <span>{SORT_OPTIONS.find((o) => o.value === filters.sort)?.label}</span>
+                <span>{sortOptions.find((o) => o.value === filters.sort)?.label}</span>
               </div>
             )}
           </div>
