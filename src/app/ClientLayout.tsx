@@ -72,10 +72,12 @@ function AuthStateMonitorWrapper({ children }: { children: ReactNode }) {
 export default function ClientLayout({ children }: ClientLayoutProps) {
   const pathname = usePathname();
   const isAdminRoute = pathname?.startsWith('/admin');
+  const isLayoutsLiveRoute = pathname?.startsWith('/layouts-live');
 
   // Admin routes: Full-width, no site header/footer (AdminShell handles layout)
+  // Layouts-live routes: Unchromed React-based homepage layout previews
   // Note: Admin routes don't track page views to avoid inflating analytics
-  if (isAdminRoute) {
+  if (isAdminRoute || isLayoutsLiveRoute) {
     return (
       <AuthProvider>
         <AuthStateMonitorWrapper>
